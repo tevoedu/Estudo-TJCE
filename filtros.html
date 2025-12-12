@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiltroQuestões - Filtros para Questões de Concurso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6de5;
+            --primary-dark: #3a56c4;
+            --secondary-color: #10b981;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --dark-card-hover: #2d3748;
+            --dark-border: #374151;
+            --light-text: #f8fafc;
+            --light-text-secondary: #cbd5e1;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --radius: 10px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--dark-card);
+            padding: 20px 0;
+            border-bottom: 1px solid var(--dark-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--light-text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--dark-card-hover);
+            color: var(--light-text);
+        }
+
+        /* Search Section */
+        .search-section {
+            margin: 40px 0;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 18px 60px 18px 25px;
+            border-radius: var(--radius);
+            border: 2px solid var(--dark-border);
+            background-color: var(--dark-card);
+            color: var(--light-text);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 109, 229, 0.2);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--light-text-secondary);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .search-hint {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--light-text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Filters Section */
+        .filters-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .filters-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .filters-card {
+            background-color: var(--dark-card);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .filters-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .standard-filters {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .specific-filters {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .filter-list {
+            list-style: none;
+        }
+
+        .filter-list li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .filter-list li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .filter-list li i {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--light-text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--dark-border);
+        }
+
+        /* Results Info */
+        .results-info {
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            background-color: var(--dark-card);
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .results-info h3 {
+            font-size: 1.2rem;
+        }
+
+        .clear-btn {
+            background-color: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .clear-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* History */
+        .history-section {
+            margin-top: 50px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            background-color: var(--dark-card);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--dark-border);
+        }
+
+        .history-item:hover {
+            background-color: var(--dark-card-hover);
+            border-color: var(--primary-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--dark-border);
+            color: var(--light-text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .search-box input {
+                padding: 15px 50px 15px 20px;
+            }
+            
+            .filters-card {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-filter logo-icon"></i>
+                <h1>Filtro<span>Questões</span></h1>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Digite um tema/assunto para buscar (ex: Princípios fundamentais, Servidores públicos, Licitações)">
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <p class="search-hint">Digite um tema acima para ver os filtros recomendados para suas pesquisas de questões</p>
+        </section>
+
+        <div id="resultsInfo" class="results-info" style="display: none;">
+            <h3 id="resultsTitle">Filtros para: <span id="topicName"></span></h3>
+            <button class="clear-btn" id="clearResults">Limpar busca</button>
+        </div>
+
+        <div class="filters-container">
+            <div class="filters-card standard-filters">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Filtros Recomendados (Padrão)
+                </h2>
+                <ul class="filter-list" id="standardFilters">
+                    <!-- Filtros padrão serão inseridos aqui -->
+                </ul>
+            </div>
+
+            <div class="filters-card specific-filters">
+                <h2 class="section-title">
+                    <i class="fas fa-bullseye"></i>
+                    Filtros Específicos do Tema
+                </h2>
+                <div id="specificFiltersContainer">
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-search"></i>
+                        <p>Digite um tema na busca acima para ver os filtros específicos recomendados</p>
+                    </div>
+                    <ul class="filter-list" id="specificFilters" style="display: none;">
+                        <!-- Filtros específicos serão inseridos aqui -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <section class="history-section">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i>
+                Histórico de Buscas
+            </h2>
+            <div class="history-list" id="searchHistory">
+                <!-- Histórico será inserido aqui -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>FiltroQuestões &copy; 2023 - Recomendações de filtros para questões de concurso</p>
+            <p>Todos os dados são salvos localmente no seu navegador</p>
+        </div>
+    </footer>
+
+    <script>
+        // Dados integrados - Conteúdo completo das disciplinas e filtros
+        const disciplinas = [
+            {
+                disciplina: "NOÇÕES DE DIREITO CONSTITUCIONAL",
+                temas: [
+                    {
+                        tema: "Constituição Federal de 1988 (estrutura e princípios)",
+                        filtros: [
+                            "Constituição da República Federativa do Brasil de 1988",
+                            "Princípios fundamentais",
+                            "Estrutura da Constituição (Preâmbulo, Títulos, Artigos, ADCT)"
+                        ]
+                    },
+                    {
+                        tema: "Princípios fundamentais da República",
+                        filtros: [
+                            "Princípios fundamentais (art. 1º ao 4º da CF)",
+                            "Soberania, cidadania, dignidade da pessoa humana, valores sociais do trabalho, pluralismo político",
+                            "República, Federação, Estado Democrático de Direito"
+                        ]
+                    },
+                    {
+                        tema: "Aplicabilidade das normas constitucionais",
+                        filtros: [
+                            "Aplicabilidade das normas constitucionais",
+                            "Normas de eficácia plena, contida e limitada",
+                            "Normas programáticas",
+                            "Classificação de José Afonso da Silva"
+                        ]
+                    },
+                    {
+                        tema: "Normas constitucionais: eficácia plena, contida e limitada",
+                        filtros: [
+                            "Normas de eficácia plena",
+                            "Normas de eficácia contida",
+                            "Normas de eficácia limitada"
+                        ]
+                    },
+                    {
+                        tema: "Normas programáticas",
+                        filtros: [
+                            "Normas programáticas"
+                        ]
+                    },
+                    {
+                        tema: "Direitos e garantias fundamentais – visão geral",
+                        filtros: [
+                            "Direitos e garantias fundamentais",
+                            "Dimensões (gerações) de direitos fundamentais"
+                        ]
+                    },
+                    {
+                        tema: "Direitos e deveres individuais e coletivos",
+                        filtros: [
+                            "Direitos e deveres individuais e coletivos",
+                            "Art. 5º da CF/88",
+                            "Remédios constitucionais: habeas corpus, mandado de segurança, mandado de injunção, habeas data, ação popular"
+                        ]
+                    },
+                    {
+                        tema: "Direitos sociais",
+                        filtros: [
+                            "Direitos sociais",
+                            "Art. 6º e 7º da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Nacionalidade",
+                        filtros: [
+                            "Direitos de nacionalidade",
+                            "Brasileiro nato e naturalizado",
+                            "Arts. 12 e 13 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Direitos políticos",
+                        filtros: [
+                            "Direitos políticos",
+                            "Alistamento eleitoral, elegibilidade, condições de inelegibilidade",
+                            "Arts. 14 a 16 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Partidos políticos",
+                        filtros: [
+                            "Partidos políticos",
+                            "Art. 17 da CF/88",
+                            "Princípios constitucionais partidários"
+                        ]
+                    },
+                    {
+                        tema: "Organização político-administrativa do Estado",
+                        filtros: [
+                            "Organização político-administrativa do Estado",
+                            "Art. 18 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Estado federal, União, Estados, DF e Municípios, Territórios",
+                        filtros: [
+                            "Estado federal brasileiro",
+                            "União, Estados, Distrito Federal, Municípios, Territórios",
+                            "Competências materiais e legislativas (arts. 21 a 30 da CF/88)"
+                        ]
+                    },
+                    {
+                        tema: "Administração pública (conceitos constitucionais)",
+                        filtros: [
+                            "Administração pública (disposições gerais - arts. 37 a 41)",
+                            "Princípios da administração pública: legalidade, impessoalidade, moralidade, publicidade, eficiência"
+                        ]
+                    },
+                    {
+                        tema: "Servidores públicos na Constituição",
+                        filtros: [
+                            "Servidores públicos",
+                            "Arts. 39 a 41 da CF/88",
+                            "Regime jurídico único"
+                        ]
+                    },
+                    {
+                        tema: "Poder Executivo: estrutura, atribuições e competências do Presidente",
+                        filtros: [
+                            "Poder executivo",
+                            "Atribuições e responsabilidades do presidente da República",
+                            "Arts. 76 a 91 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Poder Legislativo: estrutura e funcionamento",
+                        filtros: [
+                            "Poder legislativo: estrutura, funcionamento e atribuições",
+                            "Congressso Nacional, Câmara dos Deputados, Senado Federal",
+                            "Arts. 44 a 75 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Processo legislativo (regras constitucionais)",
+                        filtros: [
+                            "Processo legislativo",
+                            "Arts. 59 a 69 da CF/88",
+                            "Espécies normativas (EC, Lei Complementar, Lei Ordinária, etc.)"
+                        ]
+                    },
+                    {
+                        tema: "Fiscalização contábil, financeira e orçamentária (TCU)",
+                        filtros: [
+                            "Fiscalização contábil, financeira e orçamentária",
+                            "Tribunal de Contas da União (TCU)",
+                            "Arts. 70 a 75 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Comissões parlamentares de inquérito (CPI)",
+                        filtros: [
+                            "Comissões parlamentares de inquérito",
+                            "Art. 58, §3º da CF/88",
+                            "Poderes de CPI"
+                        ]
+                    },
+                    {
+                        tema: "Poder Judiciário: estrutura e organização",
+                        filtros: [
+                            "Poder judiciário: disposições gerais",
+                            "Órgãos do poder judiciário: organização e competências",
+                            "STF, STJ, TRFs, Tribunais Estaduais, Juízes Federais e Estaduais",
+                            "Arts. 92 a 126 da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "CNJ – Conselho Nacional de Justiça (organização e competências)",
+                        filtros: [
+                            "Conselho Nacional de Justiça (CNJ)",
+                            "Composição e competências do CNJ",
+                            "Art. 103-B da CF/88"
+                        ]
+                    },
+                    {
+                        tema: "Funções essenciais à Justiça: MP, Advocacia Pública e Defensoria Pública",
+                        filtros: [
+                            "Funções essenciais à justiça",
+                            "Ministério Público (arts. 127 a 130)",
+                            "Advocacia Pública (Advocacia-Geral da União - art. 131)",
+                            "Defensoria Pública (art. 134)"
+                        ]
+                    }
+                ]
+            },
+            {
+                disciplina: "NOÇÕES DE DIREITO ADMINISTRATIVO",
+                temas: [
+                    {
+                        tema: "Administração pública: princípios e fundamentos",
+                        filtros: [
+                            "Regime jurídico-administrativo: princípios expressos e implícitos",
+                            "Princípios da administração pública (art. 37, caput, CF)",
+                            "Supremacia do interesse público e indisponibilidade do interesse público"
+                        ]
+                    },
+                    {
+                        tema: "Estado, governo e administração pública – conceitos",
+                        filtros: [
+                            "Estado, governo e administração pública: conceitos e elementos"
+                        ]
+                    },
+                    {
+                        tema: "Elementos, poderes e organização da Administração",
+                        filtros: [
+                            "Poderes da administração pública: hierárquico, disciplinar, regulamentar e de polícia",
+                            "Uso e abuso do poder"
+                        ]
+                    },
+                    {
+                        tema: "Administração direta e indireta",
+                        filtros: [
+                            "Administração direta e indireta"
+                        ]
+                    },
+                    {
+                        tema: "Atos administrativos: conceito, elementos e atributos",
+                        filtros: [
+                            "Ato administrativo: conceito, requisitos, atributos",
+                            "Requisitos: competência, finalidade, forma, motivo, objeto",
+                            "Atributos: presunção de legitimidade, imperatividade, autoexecutoriedade"
+                        ]
+                    },
+                    {
+                        tema: "Classificação dos atos administrativos",
+                        filtros: [
+                            "Ato administrativo: classificação"
+                        ]
+                    },
+                    {
+                        tema: "Espécies de atos administrativos",
+                        filtros: [
+                            "Ato administrativo: espécies"
+                        ]
+                    },
+                    {
+                        tema: "Extinção de atos administrativos: anulação, revogação, cassação, convalidação",
+                        filtros: [
+                            "Extinção do ato administrativo: cassação, anulação, revogação e convalidação",
+                            "Decadência administrativa"
+                        ]
+                    },
+                    {
+                        tema: "Agentes públicos: categorias, direitos, deveres, responsabilidades",
+                        filtros: [
+                            "Agentes públicos: conceito, espécies, cargo/emprego/função, provimento, vacância",
+                            "Efetividade, estabilidade e vitaliciedade",
+                            "Remuneração, direitos e deveres",
+                            "Responsabilidade civil, penal e administrativa",
+                            "Processo administrativo disciplinar",
+                            "Lei Federal nº 8.112/1990 (Regime Jurídico dos Servidores Públicos Federais)"
+                        ]
+                    },
+                    {
+                        tema: "Disposições gerais da legislação administrativa",
+                        filtros: [
+                            "Direito administrativo: conceito, objeto, fontes"
+                        ]
+                    },
+                    {
+                        tema: "Poderes da Administração: hierárquico, disciplinar, regulamentar e de polícia",
+                        filtros: [
+                            "Poderes da administração pública: hierárquico, disciplinar, regulamentar e de polícia",
+                            "Poder de polícia: conceito, finalidade, condições de validade"
+                        ]
+                    },
+                    {
+                        tema: "Uso e abuso de poder",
+                        filtros: [
+                            "Uso e abuso do poder",
+                            "Desvio de finalidade, excesso de poder"
+                        ]
+                    },
+                    {
+                        tema: "Regime jurídico-administrativo (características)",
+                        filtros: [
+                            "Regime jurídico-administrativo: conceito",
+                            "Supremacia do interesse público e indisponibilidade do interesse público"
+                        ]
+                    },
+                    {
+                        tema: "Responsabilidade civil do Estado – evolução, fundamentos e espécies",
+                        filtros: [
+                            "Responsabilidade civil do Estado: evolução histórica",
+                            "Responsabilidade civil do Estado no direito brasileiro",
+                            "Teoria do risco administrativo (art. 37, §6º, CF)"
+                        ]
+                    },
+                    {
+                        tema: "Responsabilidade por ato comissivo e omissivo",
+                        filtros: [
+                            "Responsabilidade por ato comissivo do Estado",
+                            "Responsabilidade por omissão do Estado"
+                        ]
+                    },
+                    {
+                        tema: "Responsabilidade objetiva – risco administrativo",
+                        filtros: [
+                            "Responsabilidade civil do Estado (pressupõe a responsabilidade objetiva)",
+                            "Responsabilidade objetiva (teoria do risco administrativo)"
+                        ]
+                    },
+                    {
+                        tema: "Excludentes e atenuantes de responsabilidade",
+                        filtros: [
+                            "Causas excludentes e atenuantes da responsabilidade do Estado",
+                            "Caso fortuito, força maior, culpa exclusiva da vítima"
+                        ]
+                    },
+                    {
+                        tema: "Reparação de danos e direito de regresso",
+                        filtros: [
+                            "Reparação do dano",
+                            "Direito de regresso (contra o agente causador)"
+                        ]
+                    },
+                    {
+                        tema: "Serviços públicos: conceito, elementos, formas de prestação",
+                        filtros: [
+                            "Serviços públicos: conceito, elementos constitutivos, formas de prestação e meios de execução",
+                            "Princípios dos serviços públicos: continuidade, qualidade, modicidade tarifária, universalidade"
+                        ]
+                    },
+                    {
+                        tema: "Delegação: concessão, permissão e autorização",
+                        filtros: [
+                            "Delegação: concessão, permissão e autorização",
+                            "Concessão e permissão de serviços públicos (Lei 8.987/1995)"
+                        ]
+                    },
+                    {
+                        tema: "Classificação dos serviços públicos",
+                        filtros: [
+                            "Serviços públicos: classificação"
+                        ]
+                    },
+                    {
+                        tema: "Princípios da Administração Pública",
+                        filtros: [
+                            "Princípios expressos e implícitos da administração pública"
+                        ]
+                    },
+                    {
+                        tema: "Descentralização, desconcentração e concentração",
+                        filtros: [
+                            "Centralização, descentralização, concentração e desconcentração"
+                        ]
+                    },
+                    {
+                        tema: "Administração direta e indireta: autarquias, fundações, empresas públicas e sociedades de economia mista",
+                        filtros: [
+                            "Autarquias, fundações, empresas públicas e sociedades de economia mista",
+                            "Características de cada entidade"
+                        ]
+                    },
+                    {
+                        tema: "Entidades paraestatais e terceiro setor",
+                        filtros: [
+                            "Entidades paraestatais e terceiro setor"
+                        ]
+                    },
+                    {
+                        tema: "Organizações sociais e OSCIPs",
+                        filtros: [
+                            "Serviços sociais autônomos, entidades de apoio, organizações sociais, organizações da sociedade civil de interesse público (OSCIP)",
+                            "Lei 9.637/1998 (OS) e Lei 9.790/1999 (OSCIP)"
+                        ]
+                    },
+                    {
+                        tema: "Controle da Administração Pública: judicial, interno, externo e Legislativo",
+                        filtros: [
+                            "Controle da administração pública: exercido pela administração, judicial, legislativo",
+                            "Controle administrativo (hierárquico, finalístico), controle legislativo (com auxílio do TCU), controle judicial"
+                        ]
+                    },
+                    {
+                        tema: "Improbidade administrativa – Lei 8.429/1992 (alterações)",
+                        filtros: [
+                            "Improbidade administrativa (Lei nº 8.429/1992 e alterações)",
+                            "Atos de improbidade (enriquecimento ilícito, prejuízo ao erário, atentatório aos princípios)"
+                        ]
+                    },
+                    {
+                        tema: "Processo administrativo – Lei 9.784/1999",
+                        filtros: [
+                            "Processo administrativo (Lei nº 9.784/1999)",
+                            "Princípios do processo administrativo"
+                        ]
+                    },
+                    {
+                        tema: "Licitações e contratos – Lei 14.133/2021 (tópicos essenciais)",
+                        filtros: [
+                            "Licitações (Lei nº 14.133/2021)",
+                            "Fundamentos constitucionais das licitações",
+                            "Princípios da licitação",
+                            "Modalidades de licitação",
+                            "Fases do procedimento licitatório"
+                        ]
+                    },
+                    {
+                        tema: "Contratos administrativos: regime jurídico e características",
+                        filtros: [
+                            "Contratos administrativos",
+                            "Características (cláusulas exorbitantes, supremacia da administração)",
+                            "Princípios do contrato administrativo"
+                        ]
+                    }
+                ]
+            },
+            {
+                disciplina: "NOÇÕES DE ADMINISTRAÇÃO PÚBLICA",
+                temas: [
+                    {
+                        tema: "Organizações formais modernas – características básicas",
+                        filtros: [
+                            "Características básicas das organizações formais modernas",
+                            "Divisão do trabalho, hierarquia, racionalidade, impessoalidade"
+                        ]
+                    },
+                    {
+                        tema: "Tipos de estruturas organizacionais",
+                        filtros: [
+                            "Tipos de estrutura organizacional",
+                            "Estrutura linear, funcional, linha-staff, matricial"
+                        ]
+                    },
+                    {
+                        tema: "Natureza, finalidades e critérios de departamentalização",
+                        filtros: [
+                            "Natureza, finalidades e critérios de departamentalização",
+                            "Departamentalização por função, produto, cliente, território, processo"
+                        ]
+                    },
+                    {
+                        tema: "Administração pública: centralização, descentralização, concentração e desconcentração",
+                        filtros: [
+                            "Centralização, descentralização, concentração e desconcentração"
+                        ]
+                    },
+                    {
+                        tema: "Administração direta e indireta da União",
+                        filtros: [
+                            "Organização administrativa da União",
+                            "Administração direta e indireta"
+                        ]
+                    },
+                    {
+                        tema: "Gestão de processos",
+                        filtros: [
+                            "Gestão de processos",
+                            "BPM (Business Process Management)",
+                            "Mapeamento e modelagem de processos"
+                        ]
+                    },
+                    {
+                        tema: "Gestão de contratos na Administração Pública",
+                        filtros: [
+                            "Gestão de contratos",
+                            "Fiscalização de contratos, alterações contratuais, garantias, rescisão"
+                        ]
+                    },
+                    {
+                        tema: "Noções de processos licitatórios (visão geral)",
+                        filtros: [
+                            "Noções de processos licitatórios",
+                            "Fases da licitação (preparatória, divulgação, apresentação, julgamento, habilitação)",
+                            "Modalidades de licitação (Lei 14.133/2021)"
+                        ]
+                    }
+                ]
+            },
+            {
+                disciplina: "NOÇÕES DE GESTÃO PÚBLICA",
+                temas: [
+                    {
+                        tema: "Processo Administrativo (Gestão)",
+                        filtros: [
+                            "Processo administrativo (funções)",
+                            "Ciclo PDCA (Plan, Do, Check, Act)"
+                        ]
+                    },
+                    {
+                        tema: "Funções administrativas: planejamento, organização, direção e controle",
+                        filtros: [
+                            "Funções de administração: planejamento, organização, direção e controle",
+                            "POCC (Planejar, Organizar, Controlar, Comandar)"
+                        ]
+                    },
+                    {
+                        tema: "Processo de planejamento",
+                        filtros: [
+                            "Processo de planejamento",
+                            "Etapas do planejamento"
+                        ]
+                    },
+                    {
+                        tema: "Planejamento estratégico: visão, missão e análise SWOT",
+                        filtros: [
+                            "Planejamento estratégico: visão, missão e análise SWOT",
+                            "Análise SWOT (Forças, Fraquezas, Oportunidades, Ameaças)"
+                        ]
+                    },
+                    {
+                        tema: "Análise competitiva e estratégias genéricas",
+                        filtros: [
+                            "Análise competitiva e estratégias genéricas",
+                            "Estratégias de Porter (liderança de custo, diferenciação, enfoque)"
+                        ]
+                    },
+                    {
+                        tema: "Redes e alianças",
+                        filtros: [
+                            "Redes e alianças",
+                            "Parcerias público-privadas (PPP), consórcios públicos"
+                        ]
+                    },
+                    {
+                        tema: "Planejamento tático e operacional",
+                        filtros: [
+                            "Planejamento tático",
+                            "Planejamento operacional"
+                        ]
+                    },
+                    {
+                        tema: "Balanced Scorecard (BSC)",
+                        filtros: [
+                            "Balanced scorecard",
+                            "Perspectivas do BSC (financeira, cliente, processos internos, aprendizado)"
+                        ]
+                    },
+                    {
+                        tema: "Administração por objetivos (APO)",
+                        filtros: [
+                            "Administração por objetivos",
+                            "Peter Drucker"
+                        ]
+                    },
+                    {
+                        tema: "Processo decisório",
+                        filtros: [
+                            "Processo decisório",
+                            "Modelos de decisão (racional, limitada, intuitiva)",
+                            "Etapas da decisão"
+                        ]
+                    },
+                    {
+                        tema: "Organização",
+                        filtros: [
+                            "Organização (como função administrativa)"
+                        ]
+                    },
+                    {
+                        tema: "Estrutura organizacional",
+                        filtros: [
+                            "Estrutura organizacional"
+                        ]
+                    },
+                    {
+                        tema: "Tipos de departamentalização",
+                        filtros: [
+                            "Tipos de departamentalização: características, vantagens e desvantagens"
+                        ]
+                    },
+                    {
+                        tema: "Relações individuais e organizacionais",
+                        filtros: [
+                            "Comportamento organizacional: relações indivíduo/organização",
+                            "Contrato psicológico, comprometimento organizacional"
+                        ]
+                    },
+                    {
+                        tema: "Motivação e liderança",
+                        filtros: [
+                            "Motivação",
+                            "Liderança",
+                            "Teorias da motivação (Maslow, Herzberg, McClelland)",
+                            "Estilos de liderança (autocrática, democrática, liberal)"
+                        ]
+                    },
+                    {
+                        tema: "Desempenho organizacional",
+                        filtros: [
+                            "Desempenho",
+                            "Indicadores de desempenho (KPIs)"
+                        ]
+                    },
+                    {
+                        tema: "Comportamento Organizacional",
+                        filtros: [
+                            "Comportamento organizacional"
+                        ]
+                    },
+                    {
+                        tema: "Motivação humana",
+                        filtros: [
+                            "Motivação",
+                            "Teorias da motivação (conteúdo e processo)"
+                        ]
+                    },
+                    {
+                        tema: "Liderança e estilos",
+                        filtros: [
+                            "Liderança",
+                            "Teorias da liderança (traços, comportamentais, contingenciais)"
+                        ]
+                    },
+                    {
+                        tema: "Dinâmica de grupos",
+                        filtros: [
+                            "Dinâmica de grupos",
+                            "Estágios de desenvolvimento do grupo (formação, tormenta, normatização, desempenho)",
+                            "Papéis em equipe"
+                        ]
+                    },
+                    {
+                        tema: "Conflitos organizacionais",
+                        filtros: [
+                            "Conflitos organizacionais",
+                            "Tipos de conflito (intrapessoal, interpessoal, intergrupal)"
+                        ]
+                    },
+                    {
+                        tema: "Competência Interpessoal",
+                        filtros: [
+                            "Competência interpessoal",
+                            "Inteligência emocional, empatia, assertividade, escuta ativa"
+                        ]
+                    },
+                    {
+                        tema: "Comunicação no ambiente de trabalho",
+                        filtros: [
+                            "Comunicação organizacional",
+                            "Barreiras à comunicação, comunicação verbal e não verbal, feedback eficaz"
+                        ]
+                    },
+                    {
+                        tema: "Trabalho em equipe",
+                        filtros: [
+                            "Trabalho em equipe",
+                            "Características de equipes de alto desempenho, sinergia"
+                        ]
+                    },
+                    {
+                        tema: "Gestão de conflitos",
+                        filtros: [
+                            "Gerenciamento de conflitos",
+                            "Estratégias para resolução de conflitos (competição, colaboração, evitação)"
+                        ]
+                    },
+                    {
+                        tema: "Gerenciamento de Conflitos",
+                        filtros: [
+                            "Gerenciamento de conflitos"
+                        ]
+                    },
+                    {
+                        tema: "Técnicas de negociação",
+                        filtros: [
+                            "Técnicas de negociação",
+                            "Negociação distributiva e integrativa, estilos de negociação"
+                        ]
+                    },
+                    {
+                        tema: "Mediação e solução de conflitos",
+                        filtros: [
+                            "Mediação e solução de conflitos",
+                            "Processo de mediação, vantagens da mediação"
+                        ]
+                    },
+                    {
+                        tema: "Posturas profissionais na administração pública",
+                        filtros: [
+                            "Ética no serviço público",
+                            "Transparência, accountability, comportamento ético e profissional",
+                            "Código de ética do servidor público (Lei 8.027/1990 e Decreto 1.171/1994)"
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Filtros padrão recomendados para todas as buscas
+        const standardFilters = [
+            "Questões dos últimos 7 anos",
+            "Questões da banca FCC",
+            "Questões de nível médio"
+        ];
+
+        // Estado da aplicação
+        const state = {
+            currentTopic: null,
+            searchHistory: [],
+            theme: 'dark'
+        };
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearResultsBtn = document.getElementById('clearResults');
+        const resultsInfo = document.getElementById('resultsInfo');
+        const topicName = document.getElementById('topicName');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const standardFiltersList = document.getElementById('standardFilters');
+        const specificFiltersList = document.getElementById('specificFilters');
+        const emptyState = document.getElementById('emptyState');
+        const searchHistoryContainer = document.getElementById('searchHistory');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Inicialização da aplicação
+        function init() {
+            // Carregar estado do localStorage
+            loadState();
+            
+            // Renderizar filtros padrão
+            renderStandardFilters();
+            
+            // Carregar histórico
+            renderSearchHistory();
+            
+            // Configurar event listeners
+            setupEventListeners();
+            
+            // Aplicar tema salvo
+            applyTheme();
+        }
+
+        // Carregar estado do localStorage
+        function loadState() {
+            const savedState = localStorage.getItem('filtroQuestoesState');
+            if (savedState) {
+                Object.assign(state, JSON.parse(savedState));
+            }
+        }
+
+        // Salvar estado no localStorage
+        function saveState() {
+            localStorage.setItem('filtroQuestoesState', JSON.stringify(state));
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+            clearResultsBtn.addEventListener('click', clearResults);
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Sugestões de busca em tempo real
+            searchInput.addEventListener('input', showSuggestions);
+        }
+
+        // Executar busca
+        function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Buscar tema correspondente
+            const result = findTopic(searchTerm);
+            
+            if (result) {
+                // Atualizar estado
+                state.currentTopic = result.tema;
+                
+                // Adicionar ao histórico (se não estiver já)
+                if (!state.searchHistory.includes(result.tema)) {
+                    state.searchHistory.unshift(result.tema);
+                    // Manter apenas os últimos 10 itens
+                    if (state.searchHistory.length > 10) {
+                        state.searchHistory = state.searchHistory.slice(0, 10);
+                    }
+                }
+                
+                // Salvar estado
+                saveState();
+                
+                // Exibir resultados
+                displayResults(result);
+                
+                // Atualizar histórico
+                renderSearchHistory();
+            } else {
+                // Tema não encontrado
+                showNotFound();
+            }
+        }
+
+        // Buscar tema nos dados
+        function findTopic(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            
+            // Buscar por correspondência exata primeiro
+            for (const disciplina of disciplinas) {
+                for (const tema of disciplina.temas) {
+                    if (tema.tema.toLowerCase().includes(term)) {
+                        return {
+                            ...tema,
+                            disciplina: disciplina.disciplina
+                        };
+                    }
+                }
+            }
+            
+            // Buscar por palavras-chave nos filtros
+            for (const disciplina of disciplinas) {
+                for (const tema of disciplina.temas) {
+                    for (const filtro of tema.filtros) {
+                        if (filtro.toLowerCase().includes(term)) {
+                            return {
+                                ...tema,
+                                disciplina: disciplina.disciplina
+                            };
+                        }
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        // Mostrar resultados
+        function displayResults(result) {
+            // Atualizar informações do resultado
+            topicName.textContent = result.tema;
+            resultsInfo.style.display = 'flex';
+            
+            // Renderizar filtros específicos
+            renderSpecificFilters(result.filtros);
+            
+            // Adicionar classe de animação
+            resultsInfo.classList.add('fade-in');
+            specificFiltersList.classList.add('fade-in');
+            
+            // Rolar para os resultados
+            resultsInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Mostrar "não encontrado"
+        function showNotFound() {
+            // Esconder filtros específicos
+            specificFiltersList.style.display = 'none';
+            emptyState.style.display = 'block';
+            
+            // Mostrar mensagem no empty state
+            emptyState.innerHTML = `
+                <i class="fas fa-question-circle"></i>
+                <p>Tema não encontrado. Tente buscar por termos como: "Princípios fundamentais", "Servidores públicos", "Licitações"</p>
+            `;
+            
+            // Ainda mostrar os filtros padrão
+            resultsInfo.style.display = 'flex';
+            topicName.textContent = searchInput.value;
+            resultsTitle.textContent = `Tema não encontrado:`;
+        }
+
+        // Limpar resultados
+        function clearResults() {
+            state.currentTopic = null;
+            saveState();
+            
+            // Limpar campo de busca
+            searchInput.value = '';
+            
+            // Esconder informações de resultados
+            resultsInfo.style.display = 'none';
+            
+            // Esconder filtros específicos e mostrar empty state
+            specificFiltersList.style.display = 'none';
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = `
+                <i class="fas fa-search"></i>
+                <p>Digite um tema na busca acima para ver os filtros específicos recomendados</p>
+            `;
+        }
+
+        // Renderizar filtros padrão
+        function renderStandardFilters() {
+            standardFiltersList.innerHTML = '';
+            standardFilters.forEach(filter => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-check-circle"></i> ${filter}`;
+                standardFiltersList.appendChild(li);
+            });
+        }
+
+        // Renderizar filtros específicos
+        function renderSpecificFilters(filters) {
+            // Esconder empty state
+            emptyState.style.display = 'none';
+            
+            // Limpar lista atual
+            specificFiltersList.innerHTML = '';
+            
+            // Adicionar novos filtros
+            filters.forEach(filter => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-filter"></i> ${filter}`;
+                specificFiltersList.appendChild(li);
+            });
+            
+            // Mostrar a lista
+            specificFiltersList.style.display = 'block';
+        }
+
+        // Renderizar histórico de buscas
+        function renderSearchHistory() {
+            searchHistoryContainer.innerHTML = '';
+            
+            if (state.searchHistory.length === 0) {
+                searchHistoryContainer.innerHTML = '<p style="color: var(--light-text-secondary); font-style: italic;">Nenhuma busca recente</p>';
+                return;
+            }
+            
+            state.searchHistory.forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'history-item';
+                span.textContent = item;
+                span.addEventListener('click', () => {
+                    searchInput.value = item;
+                    performSearch();
+                });
+                searchHistoryContainer.appendChild(span);
+            });
+        }
+
+        // Mostrar sugestões de busca em tempo real
+        function showSuggestions() {
+            // Implementação simplificada - poderia ser expandida
+            // para mostrar sugestões em tempo real
+        }
+
+        // Alternar tema
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            saveState();
+            applyTheme();
+        }
+
+        // Aplicar tema
+        function applyTheme() {
+            if (state.theme === 'dark') {
+                document.documentElement.style.setProperty('--dark-bg', '#0f172a');
+                document.documentElement.style.setProperty('--dark-card', '#1e293b');
+                document.documentElement.style.setProperty('--dark-card-hover', '#2d3748');
+                document.documentElement.style.setProperty('--dark-border', '#374151');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                themeToggle.title = 'Alternar para tema claro';
+            } else {
+                document.documentElement.style.setProperty('--dark-bg', '#f8fafc');
+                document.documentElement.style.setProperty('--dark-card', '#ffffff');
+                document.documentElement.style.setProperty('--dark-card-hover', '#f1f5f9');
+                document.documentElement.style.setProperty('--dark-border', '#e2e8f0');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                themeToggle.title = 'Alternar para tema escuro';
+            }
+            
+            // Ajustar cores de texto para tema claro
+            if (state.theme === 'light') {
+                document.documentElement.style.setProperty('--light-text', '#1e293b');
+                document.documentElement.style.setProperty('--light-text-secondary', '#64748b');
+            } else {
+                document.documentElement.style.setProperty('--light-text', '#f8fafc');
+                document.documentElement.style.setProperty('--light-text-secondary', '#cbd5e1');
+            }
+        }
+
+        // Inicializar a aplicação
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
