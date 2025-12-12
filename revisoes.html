@@ -1,0 +1,2906 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker - Sistema de Revisão por Desempenho</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ================== VARIÁVEIS DE TEMA ================== */
+        :root {
+            /* Tema escuro (padrão) */
+            --primary-red: #d32f2f;
+            --primary-green: #4CAF50;
+            --primary-blue: #2196F3;
+            --primary-purple: #9C27B0;
+            --primary-yellow: #FFC107;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --card-border: #2c2c2c;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaa;
+            --overdue-color: #ff9800;
+            --header-bg: linear-gradient(135deg, var(--primary-red), #b71c1c);
+            --header-text: white;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --empty-state-color: var(--text-secondary);
+            --stat-card-bg: var(--card-border);
+            --stat-card-shadow: rgba(0, 0, 0, 0.3);
+            --table-hover: rgba(255, 255, 255, 0.05);
+            --search-bg: var(--card-bg);
+            --search-text: var(--text-primary);
+            --backup-border: var(--primary-blue);
+            --backup-bg: rgba(33, 150, 243, 0.1);
+        }
+        [data-theme="light"] {
+            /* Tema claro com paleta melhorada */
+            --primary-red: #C0392B;
+            --primary-green: #27AE60;
+            --primary-blue: #2980B9;
+            --primary-purple: #8E44AD;
+            --primary-yellow: #F39C12;
+            --dark-bg: #FFFFFF;
+            --card-bg: #F7F9FA;
+            --card-border: #E1E4E7;
+            --text-primary: #2C3E50;
+            --text-secondary: #7F8C8D;
+            --overdue-color: #E67E22;
+            --header-bg: linear-gradient(135deg, #3498DB, #2980B9);
+            --header-text: white;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --empty-state-color: #95a5a6;
+            --stat-card-bg: #FFFFFF;
+            --stat-card-shadow: rgba(0, 0, 0, 0.05);
+            --table-hover: rgba(0, 0, 0, 0.02);
+            --search-bg: white;
+            --search-text: #2C3E50;
+            --backup-border: #3498DB;
+            --backup-bg: rgba(52, 152, 219, 0.1);
+        }
+        /* ================== ESTILOS GERAIS ================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            background-color: var(--card-bg);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .tab-btn {
+            background-color: var(--card-border);
+            color: var(--text-primary);
+            border: none;
+            padding: 12px 24px;
+            margin: 0 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .tab-btn:hover {
+            background-color: var(--primary-red);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary-red);
+            color: white;
+            box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 15px var(--shadow-color);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Disciplinas */
+        .discipline-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .discipline-card {
+            background-color: var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .discipline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow-color);
+        }
+        
+        .discipline-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: var(--primary-red);
+        }
+        
+        .discipline-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .discipline-card h3 {
+            color: var(--primary-red);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            flex: 1;
+            font-weight: 600;
+        }
+        
+        .discipline-card p {
+            margin: 5px 0;
+            color: var(--text-secondary);
+        }
+        
+        .discipline-card .topics-count {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--primary-green);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .discipline-card .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 5px;
+        }
+        
+        .discipline-card .delete-btn:hover {
+            color: var(--primary-red);
+        }
+        
+        /* Assuntos */
+        .discipline-board {
+            display: flex;
+            gap: 25px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .prancheta {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            background-color: var(--card-border);
+        }
+        
+        .prancheta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .prancheta.red {
+            background-color: rgba(211, 47, 47, 0.1);
+            border: 2px solid var(--primary-red);
+        }
+        
+        .prancheta.green {
+            background-color: rgba(76, 175, 80, 0.1);
+            border: 2px solid var(--primary-green);
+        }
+        
+        .prancheta.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 2px solid var(--primary-yellow);
+        }
+        
+        .prancheta.blue {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 2px solid var(--primary-blue);
+        }
+        
+        .prancheta h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+        
+        .prancheta.red h3 {
+            color: var(--primary-red);
+        }
+        
+        .prancheta.green h3 {
+            color: var(--primary-green);
+        }
+        
+        .prancheta.yellow h3 {
+            color: var(--primary-yellow);
+        }
+        
+        .prancheta.blue h3 {
+            color: var(--primary-blue);
+        }
+        
+        .topic-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .topic-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 3px 6px var(--shadow-color);
+            position: relative;
+            border: 1px solid var(--card-border);
+        }
+        
+        .topic-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        
+        .topic-card-header > div {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .topic-card h4 {
+            margin-bottom: 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            flex: 1;
+            font-weight: 600;
+        }
+        
+        .topic-card .material {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .topic-card .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .topic-card .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .topic-card .stat .value {
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+        
+        .topic-card .stat .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .topic-card .review-date {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 5px;
+            color: var(--text-primary);
+        }
+        
+        .topic-card .review-date.overdue {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--overdue-color);
+        }
+        
+        .topic-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .topic-card .btn-review {
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .topic-card .btn-review:hover {
+            background-color: #b71c1c;
+            transform: scale(1.05);
+        }
+        
+        .topic-card .btn-suspend {
+            background-color: var(--primary-yellow);
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .topic-card .btn-suspend:hover {
+            background-color: #e0a800;
+        }
+        
+        .topic-card .btn-unsuspend {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .topic-card .btn-unsuspend:hover {
+            background-color: #0b7dda;
+        }
+        
+        .topic-card .delete-topic-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 5px;
+        }
+        
+        .topic-card .delete-topic-btn:hover {
+            color: var(--primary-red);
+        }
+        
+        /* Formulários */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-red);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn-primary:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--card-border);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .btn-blue {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        .btn-blue:hover {
+            background-color: #0b7dda;
+            transform: translateY(-2px);
+        }
+        
+        .btn-purple {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background-color: #7b1fa2;
+            transform: translateY(-2px);
+        }
+        
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header h3 {
+            color: var(--primary-red);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--primary-red);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: var(--card-border);
+            color: var(--text-primary);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            display: none;
+            z-index: 2000;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Botão Voltar */
+        .back-btn {
+            background-color: var(--card-border);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: #3a3a3a;
+            transform: translateY(-2px);
+        }
+        
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--empty-state-color);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary-red);
+        }
+        
+        .empty-state h3 {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        /* Tempo estimado */
+        .time-estimate {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--primary-green);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        /* Backup */
+        .backup-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .backup-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .backup-info {
+            background-color: var(--backup-bg);
+            border: 1px solid var(--backup-border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .backup-info h4 {
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .backup-info p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        /* Dashboard de Estatísticas */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--stat-card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px var(--stat-card-shadow);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--card-border);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            background-color: var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-header h3 {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .chart-filters {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+        
+        .table-container {
+            background-color: var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            overflow-x: auto;
+        }
+        
+        .table-filters {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .table-filters .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .table-search {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 300px;
+            width: 100%;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            background-color: var(--search-bg);
+            color: var(--search-text);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th,
+        .stats-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-table th {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--primary-red);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .stats-table th:hover {
+            background-color: rgba(211, 47, 47, 0.1);
+        }
+        
+        .stats-table tr:hover {
+            background-color: var(--table-hover);
+        }
+        
+        .accuracy-cell {
+            font-weight: bold;
+        }
+        
+        .accuracy-high {
+            color: #27AE60;
+        }
+        
+        .accuracy-medium {
+            color: #F39C12;
+        }
+        
+        .accuracy-low {
+            color: #C0392B;
+        }
+        
+        /* Botão de Tema */
+        .theme-toggle-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 900px) {
+            .discipline-board {
+                flex-direction: column;
+            }
+            
+            .discipline-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .nav-tabs {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .discipline-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .backup-buttons {
+                flex-direction: column;
+            }
+            
+            .chart-filters {
+                flex-direction: column;
+            }
+            
+            .theme-toggle-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                transform: none;
+                margin-top: 10px;
+                align-self: center;
+            }
+        }
+
+        /* Novos estilos para o sistema de revisão por desempenho */
+        .interleaved-order {
+            background-color: rgba(33, 150, 243, 0.1);
+            border-left: 4px solid var(--primary-blue);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .interleaved-order h4 {
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .session-progress {
+            background-color: var(--card-border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">   
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="disciplines">
+                <i class="fas fa-graduation-cap"></i> Disciplinas
+            </button>
+            <button class="tab-btn" data-tab="add-discipline">
+                <i class="fas fa-plus-circle"></i> Nova Disciplina
+            </button>
+            <button class="tab-btn" data-tab="add-topic">
+                <i class="fas fa-plus"></i> Novo Assunto
+            </button>
+            <button class="tab-btn" data-tab="reviews">
+                <i class="fas fa-calendar-check"></i> Revisões
+            </button>
+            <button class="tab-btn" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            
+            <button id="themeToggle" class="theme-toggle-btn" aria-label="Alternar tema">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        
+        <!-- Tab: Lista de Disciplinas -->
+        <div id="disciplines" class="tab-content active">
+            <h2><i class="fas fa-list"></i> Disciplinas Cadastradas</h2>
+            <p class="description">Clique em uma disciplina para ver seus assuntos e revisões</p>
+            
+            <div class="discipline-list" id="disciplineList">
+                <!-- As disciplinas serão carregadas aqui via JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Tab: Adicionar Nova Disciplina -->
+        <div id="add-discipline" class="tab-content">
+            <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Disciplina</h2>
+            
+            <div class="form-group">
+                <label for="disciplineName">Nome da Disciplina:</label>
+                <input type="text" id="disciplineName" class="form-control" placeholder="Ex: Matemática, Português...">
+            </div>
+            
+            <button id="addDisciplineBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Disciplina
+            </button>
+        </div>
+        
+        <!-- Tab: Adicionar Novo Assunto -->
+        <div id="add-topic" class="tab-content">
+            <h2><i class="fas fa-plus"></i> Adicionar Novo Assunto</h2>
+            
+            <div class="form-group">
+                <label for="topicDiscipline">Disciplina:</label>
+                <select id="topicDiscipline" class="form-control">
+                    <option value="">Selecione uma disciplina</option>
+                    <!-- As disciplinas serão carregadas aqui via JavaScript -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="topicName">Nome do Assunto:</label>
+                <input type="text" id="topicName" class="form-control" placeholder="Ex: Funções, Acentuação Gráfica...">
+            </div>
+            
+            <div class="form-group">
+                <label for="topicMaterial">Material Base:</label>
+                <input type="text" id="topicMaterial" class="form-control" placeholder="Ex: PDF Aula 3, Livro Capítulo 5...">
+            </div>
+            
+            <div class="form-group">
+                <label for="topicImportance">Importância (1-5):</label>
+                <input type="number" id="topicImportance" class="form-control" min="1" max="5" value="3" oninput="this.value = Math.max(1, Math.min(5, this.value))">
+            </div>
+            
+            <button id="addTopicBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Assunto
+            </button>
+        </div>
+        
+        <!-- Tab: Revisões -->
+        <div id="reviews" class="tab-content">
+            <h2><i class="fas fa-calendar-check"></i> Revisões Pendentes</h2>
+            <p class="description">Assuntos priorizados com base na dificuldade e tempo desde a última revisão</p>
+            
+            <div class="session-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="dailyProgress"></div>
+                </div>
+                <div class="progress-text" id="progressText">0/4 revisões completadas</div>
+                <button id="reviewGoalConfig" class="config-btn" style="background: none; border: none; color: #aaa; cursor: pointer; margin-left: 10px;">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+            
+            <div class="time-estimate">
+                <i class="fas fa-clock"></i> Tempo estimado para esta sessão: <span id="sessionTimeEstimate">45 minutos</span>
+            </div>
+
+            <div class="interleaved-order">
+                <h4><i class="fas fa-random"></i> Ordem Intercalada</h4>
+                <p>As revisões são organizadas alternando entre disciplinas para melhor retenção</p>
+            </div>
+            
+            <div id="reviewList">
+                <!-- As revisões serão carregadas aqui via JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Tela de Assuntos de uma Disciplina -->
+        <div id="topicsTab" class="tab-content">
+            <button class="back-btn" id="backToDisciplines">
+                <i class="fas fa-arrow-left"></i> Voltar para Disciplinas
+            </button>
+            
+            <h2 id="disciplineTitle"><i class="fas fa-book"></i> Disciplina</h2>
+            
+            <div class="discipline-board">
+                <div class="prancheta red">
+                    <div class="prancheta-header">
+                        <h3><i class="fas fa-exclamation-circle"></i> Revisões Atrasadas</h3>
+                    </div>
+                    <div class="topic-list" id="redTopics">
+                        <!-- Assuntos vencidos/para hoje -->
+                    </div>
+                </div>
+                
+                <div class="prancheta green">
+                    <div class="prancheta-header">
+                        <h3><i class="fas fa-check-circle"></i> Revisões Futuras</h3>
+                    </div>
+                    <div class="topic-list" id="greenTopics">
+                        <!-- Assuntos futuros -->
+                    </div>
+                </div>
+                
+                <div class="prancheta yellow">
+                    <div class="prancheta-header">
+                        <h3><i class="fas fa-pause-circle"></i> Assuntos Suspensos</h3>
+                    </div>
+                    <div class="topic-list" id="yellowTopics">
+                        <!-- Assuntos suspensos -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard de Estatísticas -->
+        <div id="dashboard" class="tab-content">
+            <h2><i class="fas fa-chart-line"></i> Dashboard de Estatísticas</h2>
+            <p class="description">Visualize seu desempenho e progresso de estudo</p>
+            
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <i class="fas fa-question-circle" style="color: #2196F3;"></i>
+                    <h3>Total de Questões</h3>
+                    <div class="value" id="totalQuestions">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                    <h3>Total de Acertos</h3>
+                    <div class="value" id="totalCorrect">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-times-circle" style="color: #F44336;"></i>
+                    <h3>Total de Erros</h3>
+                    <div class="value" id="totalIncorrect">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-calendar-times" style="color: #FF9800;"></i>
+                    <h3>Revisões Pendentes</h3>
+                    <div class="value" id="pendingReviews">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check" style="color: #9C27B0;"></i>
+                    <h3>Revisões Feitas</h3>
+                    <div class="value" id="completedReviews">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-percentage" style="color: #00BCD4;"></i>
+                    <h3>Acurácia</h3>
+                    <div class="value" id="overallAccuracy">0%</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-bar"></i> Desempenho por Disciplina</h3>
+                    <div class="chart-filters">
+                        <button class="btn btn-purple active" data-chart="accuracy">Acurácia</button>
+                        <button class="btn btn-purple" data-chart="questions">Questões</button>
+                        <button class="btn btn-purple" data-chart="reviews">Revisões</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição de Estudo</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <h3><i class="fas fa-table"></i> Estatísticas Detalhadas por Assunto</h3>
+                
+                <!-- Filtros para a tabela -->
+                <div class="table-filters">
+                    <div class="form-group">
+                        <label for="disciplineFilter">Filtrar por Disciplina:</label>
+                        <select id="disciplineFilter" class="form-control">
+                            <option value="">Todas as disciplinas</option>
+                            <!-- As disciplinas serão carregadas aqui via JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accuracyFilter">Filtrar por Acurácia:</label>
+                        <select id="accuracyFilter" class="form-control">
+                            <option value="">Todas as acurácias</option>
+                            <option value="80">Acima de 80%</option>
+                            <option value="60">Acima de 60%</option>
+                            <option value="50">Acima de 50%</option>
+                            <option value="below50">Abaixo de 50%</option>
+                            <option value="below40">Abaixo de 40%</option>
+                            <option value="below20">Abaixo de 20%</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-search">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="tableSearch" placeholder="Pesquisar disciplina ou assunto...">
+                    </div>
+                </div>
+                
+                <table class="stats-table" id="statsTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="discipline">Disciplina</th>
+                            <th data-sort="topic">Assunto</th>
+                            <th data-sort="questions">Questões</th>
+                            <th data-sort="correct">Acertos</th>
+                            <th data-sort="incorrect">Erros</th>
+                            <th data-sort="accuracy">Acurácia</th>
+                            <th data-sort="interval">Intervalo (dias)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                        <!-- Dados serão preenchidos por JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Registrar Progresso -->
+    <div class="modal" id="progressModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            
+            <div class="modal-header">
+                <h3><i class="fas fa-tasks"></i> Registrar Progresso</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="questionsInput">Quantidade de Questões Resolvidas:</label>
+                <input type="number" id="questionsInput" class="form-control" min="0" value="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="correctInput">Quantidade de Acertos:</label>
+                <input type="number" id="correctInput" class="form-control" min="0" value="8">
+            </div>
+            
+            <div class="form-group">
+                <label>Tempo Estimado: <span id="estimatedTime">20 min</span></label>
+            </div>
+            
+            <div class="form-group">
+                <label>Próxima Revisão: <span id="nextReviewDate">--/--/----</span></label>
+            </div>
+            
+            <div class="form-group">
+                <label>Dificuldade:</label>
+                <div class="difficulty-options" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="difficulty-btn" data-value="0">Não lembrei</button>
+                    <button class="difficulty-btn" data-value="1">Difícil</button>
+                    <button class="difficulty-btn" data-value="2">Bom</button>
+                    <button class="difficulty-btn" data-value="3">Fácil</button>
+                </div>
+            </div>
+            
+            <button id="saveProgressBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Progresso
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            
+            <div class="modal-header">
+                <h3 id="confirmationTitle"><i class="fas fa-exclamation-triangle"></i> Confirmação</h3>
+            </div>
+            
+            <p id="confirmationMessage">Tem certeza que deseja realizar esta ação?</p>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button id="cancelBtn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button id="confirmBtn" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Configurar Meta Diária -->
+    <div class="modal" id="goalConfigModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            
+            <div class="modal-header">
+                <h3><i class="fas fa-tasks"></i> Configurar Meta Diária</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="dailyGoalInput">Quantidade de revisões diárias desejadas:</label>
+                <input type="number" id="dailyGoalInput" class="form-control" min="1" value="4">
+            </div>
+            
+            <button id="saveGoalBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal para Editar Assunto -->
+    <div class="modal" id="editTopicModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Editar Assunto</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="editTopicName">Nome do Assunto:</label>
+                <input type="text" id="editTopicName" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="editTopicMaterial">Material Base:</label>
+                <input type="text" id="editTopicMaterial" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="editTopicImportance">Importância (1-5):</label>
+                <input type="number" id="editTopicImportance" class="form-control" min="1" max="5" value="3">
+            </div>
+            
+            <button id="saveEditTopicBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        // ================================================
+        // CONSTANTES DO SISTEMA
+        // ================================================
+        const MIN_INTERVAL = 2;  // Mínimo de 2 dias
+        const MAX_INTERVAL = 25; // Máximo de 25 dias
+        
+        // ================================================
+        // FUNÇÕES AUXILIARES PARA DATAS
+        // ================================================
+        function parseDate(dateValue) {
+            if (!dateValue) return null;
+            
+            if (typeof dateValue === 'number') {
+                return new Date(dateValue);
+            }
+            
+            const isoDate = new Date(dateValue);
+            if (!isNaN(isoDate.getTime())) {
+                return isoDate;
+            }
+            
+            const parts = dateValue.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
+                const date = new Date(year, month, day);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+            }
+            
+            return null;
+        }
+        
+        function formatDate(dateValue) {
+            if (!dateValue) return '';
+            
+            const date = parseDate(dateValue);
+            if (!date || isNaN(date.getTime())) return '';
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        function getToday() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today.getTime();
+        }
+        
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result.getTime();
+        }
+        
+        // ================================================
+        // SISTEMA DE REVISÃO POR DESEMPENHO
+        // ================================================
+        function getPerformanceBasedInterval(accuracy) {
+            accuracy = Math.max(0, Math.min(100, accuracy));
+            
+            // Calcular intervalo baseado na acurácia
+            let interval;
+            if (accuracy >= 90) interval = 25;
+            else if (accuracy >= 80) interval = 20;
+            else if (accuracy >= 70) interval = 15;
+            else if (accuracy >= 60) interval = 12;
+            else if (accuracy >= 50) interval = 8;
+            else if (accuracy >= 40) interval = 5;
+            else interval = 2;
+            
+            // Garantir que está dentro dos limites
+            interval = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, interval));
+            
+            return interval;
+        }
+        
+        function calculateNextReviewDate(topic, difficulty, accuracy) {
+            const today = getToday();
+            
+            // Obter intervalo baseado no desempenho
+            let interval = getPerformanceBasedInterval(accuracy);
+            
+            // Ajustar intervalo baseado na dificuldade
+            if (difficulty === 0) interval = MIN_INTERVAL; // Não lembrei - intervalo mínimo
+            else if (difficulty === 1) interval = Math.max(MIN_INTERVAL, Math.floor(interval * 0.7)); // Difícil - reduzir
+            else if (difficulty === 3) interval = Math.min(MAX_INTERVAL, Math.floor(interval * 1.3)); // Fácil - aumentar
+            
+            // Ajustar baseado na importância
+            const importanceFactor = topic.importance / 3; // 1-5, média 3
+            interval = Math.floor(interval * importanceFactor);
+            
+            // Garantir limites
+            interval = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, interval));
+            
+            // Calcular próxima data
+            return addDays(today, interval);
+        }
+        
+        // ================================================
+        // SISTEMA DE ORDENAÇÃO INTERCALADA
+        // ================================================
+        function getInterleavedReviewOrder(pendingTopics) {
+            if (pendingTopics.length === 0) return [];
+            
+            // Agrupar assuntos por disciplina
+            const topicsByDiscipline = {};
+            const disciplineOrder = [];
+            
+            pendingTopics.forEach(item => {
+                const disciplineName = item.discipline.name;
+                if (!topicsByDiscipline[disciplineName]) {
+                    topicsByDiscipline[disciplineName] = [];
+                    disciplineOrder.push(disciplineName);
+                }
+                topicsByDiscipline[disciplineName].push(item);
+            });
+            
+            // Ordenar assuntos dentro de cada disciplina pela ordem de cadastro
+            disciplineOrder.forEach(disciplineName => {
+                const topics = topicsByDiscipline[disciplineName];
+                
+                // Encontrar a disciplina correspondente
+                const discipline = disciplines.find(d => d.name === disciplineName);
+                if (discipline) {
+                    topics.sort((a, b) => {
+                        const indexA = discipline.assuntos.findIndex(t => t.nome === a.topic.nome);
+                        const indexB = discipline.assuntos.findIndex(t => t.nome === b.topic.nome);
+                        return indexA - indexB;
+                    });
+                }
+            });
+            
+            // Intercalar assuntos entre disciplinas
+            const interleaved = [];
+            let maxTopics = Math.max(...Object.values(topicsByDiscipline).map(arr => arr.length));
+            
+            for (let i = 0; i < maxTopics; i++) {
+                disciplineOrder.forEach(disciplineName => {
+                    const topics = topicsByDiscipline[disciplineName];
+                    if (i < topics.length) {
+                        interleaved.push(topics[i]);
+                    }
+                });
+            }
+            
+            return interleaved;
+        }
+        
+        // ================================================
+        // PRÉ-CADASTRO DAS DISCIPLINAS
+        // ================================================
+        const PRELOADED_DISCIPLINES = [
+            {
+                name: "NOÇÕES DE DIREITO CONSTITUCIONAL",
+                assuntos: [
+                    "Constituição Federal de 1988 (estrutura e princípios)",
+                    "Princípios fundamentais da República",
+                    "Aplicabilidade das normas constitucionais",
+                    "Normas constitucionais: eficácia plena, contida e limitada",
+                    "Normas programáticas",
+                    "Direitos e garantias fundamentais – visão geral",
+                    "Direitos e deveres individuais e coletivos",
+                    "Direitos sociais",
+                    "Nacionalidade",
+                    "Direitos políticos",
+                    "Partidos políticos",
+                    "Organização político-administrativa do Estado",
+                    "Estado federal, União, Estados, DF e Municípios, Territórios",
+                    "Administração pública (conceitos constitucionais)",
+                    "Servidores públicos na Constituição",
+                    "Poder Executivo: estrutura, atribuições e competências do Presidente",
+                    "Poder Legislativo: estrutura e funcionamento",
+                    "Processo legislativo (regras constitucionais)",
+                    "Fiscalização contábil, financeira e orçamentária (TCU)",
+                    "Comissões parlamentares de inquérito (CPI)",
+                    "Poder Judiciário: estrutura e organização",
+                    "CNJ – Conselho Nacional de Justiça (organização e competências)",
+                    "Funções essenciais à Justiça: MP, Advocacia Pública e Defensoria Pública"
+                ]
+            },
+            {
+                name: "NOÇÕES DE DIREITO ADMINISTRATIVO",
+                assuntos: [
+                    "Administração pública: princípios e fundamentos",
+                    "Estado, governo e administração pública – conceitos",
+                    "Elementos, poderes e organização da Administração",
+                    "Administração direta e indireta",
+                    "Atos administrativos: conceito, elementos e atributos",
+                    "Classificação dos atos administrativos",
+                    "Espécies de atos administrativos",
+                    "Extinção de atos administrativos: anulação, revogação, cassação, convalidação",
+                    "Agentes públicos: categorias, direitos, deveres, responsabilidades",
+                    "Disposições gerais da legislação administrativa",
+                    "Poderes da Administração: hierárquico, disciplinar, regulamentar e de polícia",
+                    "Uso e abuso de poder",
+                    "Regime jurídico-administrativo (características)",
+                    "Responsabilidade civil do Estado – evolução, fundamentos e espécies",
+                    "Responsabilidade por ato comissivo e omissivo",
+                    "Responsabilidade objetiva – risco administrativo",
+                    "Excludentes e atenuantes de responsabilidade",
+                    "Reparação de danos e direito de regresso",
+                    "Serviços públicos: conceito, elementos, formas de prestação",
+                    "Delegação: concessão, permissão e autorização",
+                    "Classificação dos serviços públicos",
+                    "Princípios da Administração Pública",
+                    "Descentralização, desconcentração e concentração",
+                    "Administração direta e indireta: autarquias, fundações, empresas públicas e sociedades de economia mista",
+                    "Entidades paraestatais e terceiro setor",
+                    "Organizações sociais e OSCIPs",
+                    "Controle da Administração Pública: judicial, interno, externo e Legislativo",
+                    "Improbidade administrativa – Lei 8.429/1992 (alterações)",
+                    "Processo administrativo – Lei 9.784/1999",
+                    "Licitações e contratos – Lei 14.133/2021 (tópicos essenciais)",
+                    "Contratos administrativos: regime jurídico e características"
+                ]
+            },
+            {
+                name: "NOÇÕES DE ADMINISTRAÇÃO PÚBLICA",
+                assuntos: [
+                    "Organizações formais modernas – características básicas",
+                    "Tipos de estruturas organizacionais",
+                    "Natureza, finalidades e critérios de departamentalização",
+                    "Administração pública: centralização, descentralização, concentração e desconcentração",
+                    "Administração direta e indireta da União",
+                    "Gestão de processos",
+                    "Gestão de contratos na Administração Pública",
+                    "Noções de processos licitatórios (visão geral)"
+                ]
+            },
+            {
+                name: "NOÇÕES DE GESTÃO PÚBLICA",
+                assuntos: [
+                    "Processo Administrativo (Gestão)",
+                    "Funções administrativas: planejamento, organização, direção e controle",
+                    "Processo de planejamento",
+                    "Planejamento estratégico: visão, missão e análise SWOT",
+                    "Análise competitiva e estratégias genéricas",
+                    "Redes e alianças",
+                    "Planejamento tático e operacional",
+                    "Balanced Scorecard (BSC)",
+                    "Administração por objetivos (APO)",
+                    "Processo decisório",
+                    "Organização",
+                    "Estrutura organizacional",
+                    "Tipos de departamentalização",
+                    "Relações individuais e organizacionais",
+                    "Motivação e liderança",
+                    "Desempenho organizacional",
+                    "Comportamento Organizacional",
+                    "Motivação humana",
+                    "Liderança e estilos",
+                    "Dinâmica de grupos",
+                    "Conflitos organizacionais",
+                    "Competência Interpessoal",
+                    "Comunicação no ambiente de trabalho",
+                    "Trabalho em equipe",
+                    "Gestão de conflitos",
+                    "Gerenciamento de Conflitos",
+                    "Técnicas de negociação",
+                    "Mediação e solução de conflitos",
+                    "Posturas profissionais na administração pública"
+                ]
+            }
+        ];
+        
+        function initializePreloadedData() {
+            const today = getToday();
+            const ninetyDaysAgo = today - (90 * 24 * 60 * 60 * 1000);
+            
+            PRELOADED_DISCIPLINES.forEach(disciplineData => {
+                const discipline = {
+                    name: disciplineData.name,
+                    assuntos: disciplineData.assuntos.map((assunto, index) => ({
+                        nome: assunto,
+                        material: "Material padrão",
+                        importance: 3,
+                        questions: 0,
+                        correct: 0,
+                        incorrect: 0,
+                        repetitions: 0,
+                        interval: 2, // Começa com intervalo mínimo
+                        nextReviewDate: ninetyDaysAgo, // Status: ATRASADO
+                        lastReviewed: null,
+                        difficultyHistory: [],
+                        suspended: false,
+                        reviewMethod: 'performance' // Revisão por desempenho
+                    }))
+                };
+                
+                disciplines.push(discipline);
+            });
+            
+            saveData();
+        }
+        
+        // ================================================
+        // ESTRUTURA DE DADOS E INICIALIZAÇÃO
+        // ================================================
+        let disciplines = JSON.parse(localStorage.getItem('disciplines')) || [];
+        
+        // Se não houver dados, inicializar com as disciplinas pré-cadastradas
+        if (disciplines.length === 0) {
+            initializePreloadedData();
+        }
+        
+        // Elementos DOM
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const disciplineList = document.getElementById('disciplineList');
+        const topicsTab = document.getElementById('topicsTab');
+        const backToDisciplinesBtn = document.getElementById('backToDisciplines');
+        const disciplineTitle = document.getElementById('disciplineTitle');
+        const redTopics = document.getElementById('redTopics');
+        const greenTopics = document.getElementById('greenTopics');
+        const yellowTopics = document.getElementById('yellowTopics');
+        const progressModal = document.getElementById('progressModal');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const toast = document.getElementById('toast');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const confirmationTitle = document.getElementById('confirmationTitle');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const statsTableBody = document.getElementById('statsTableBody');
+        const tableSearch = document.getElementById('tableSearch');
+        const disciplineFilter = document.getElementById('disciplineFilter');
+        const accuracyFilter = document.getElementById('accuracyFilter');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const dailyProgress = document.getElementById('dailyProgress');
+        const progressText = document.getElementById('progressText');
+        const themeToggle = document.getElementById('themeToggle');
+        let performanceChart = null;
+        let distributionChart = null;
+        let statsData = [];
+        let currentDifficulty = 2;
+        let currentDisciplineIndex = null;
+        let currentTopicIndex = null;
+        let pendingAction = null;
+        let pendingIndex = null;
+        let sortColumn = 'discipline';
+        let sortDirection = 'asc';
+        let dailyCompletedReviews = parseInt(localStorage.getItem('dailyCompletedReviews')) || 0;
+        let lastReviewDate = localStorage.getItem('lastReviewDate') || new Date().toISOString().split('T')[0];
+        let dailyReviewGoal = parseInt(localStorage.getItem('dailyReviewGoal')) || 4;
+        let currentEditTopicIndex = null;
+        
+        // Verificar se é um novo dia para resetar o contador
+        const today = new Date().toISOString().split('T')[0];
+        if (today !== lastReviewDate) {
+            dailyCompletedReviews = 0;
+            localStorage.setItem('dailyCompletedReviews', dailyCompletedReviews);
+            localStorage.setItem('lastReviewDate', today);
+        }
+        
+        // ================================================
+        // FUNÇÕES PRINCIPAIS
+        // ================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDisciplines();
+            updateDisciplineSelect();
+            setupEventListeners();
+            updateDailyProgress();
+            
+            // Verificar tema salvo
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.body.setAttribute('data-theme', savedTheme);
+                const icon = themeToggle.querySelector('i');
+                icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        });
+        
+        function renderDisciplines() {
+            disciplineList.innerHTML = '';
+            
+            if (disciplines.length === 0) {
+                disciplineList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Nenhuma disciplina cadastrada</h3>
+                        <p>Adicione sua primeira disciplina para começar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            disciplines.forEach((discipline, index) => {
+                const card = document.createElement('div');
+                card.className = 'discipline-card';
+                card.innerHTML = `
+                    <div class="discipline-card-header">
+                        <h3>${escapeHtml(discipline.name)}</h3>
+                        <button class="delete-btn" data-index="${index}" title="Remover disciplina">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <p>${discipline.assuntos ? discipline.assuntos.length : 0} assuntos</p>
+                    <p class="topics-count">${countTopicsForReview(discipline)} para revisão</p>
+                `;
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-btn')) {
+                        showTopics(index);
+                    }
+                });
+                disciplineList.appendChild(card);
+            });
+            
+            document.querySelectorAll('.discipline-card .delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(btn.dataset.index);
+                    showConfirmation(
+                        'Excluir Disciplina', 
+                        `Tem certeza que deseja excluir a disciplina "${disciplines[index].name}"? Todos os assuntos e dados associados serão excluídos.`,
+                        () => deleteDiscipline(index)
+                    );
+                });
+            });
+        }
+        
+        function showTopics(disciplineIndex) {
+            currentDisciplineIndex = disciplineIndex;
+            const discipline = disciplines[disciplineIndex];
+            
+            disciplineTitle.innerHTML = `<i class="fas fa-book"></i> ${escapeHtml(discipline.name)}`;
+            renderTopics();
+            showTab('topicsTab');
+        }
+        
+        function renderTopics() {
+            redTopics.innerHTML = '';
+            greenTopics.innerHTML = '';
+            yellowTopics.innerHTML = '';
+            
+            const discipline = disciplines[currentDisciplineIndex];
+            const today = getToday();
+            
+            if (!discipline.assuntos || discipline.assuntos.length === 0) {
+                redTopics.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>Nenhum assunto cadastrado</h3>
+                        <p>Adicione assuntos para esta disciplina</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            discipline.assuntos.forEach((topic, index) => {
+                const nextReviewDate = topic.nextReviewDate;
+                
+                let status = 'future';
+                if (nextReviewDate) {
+                    if (nextReviewDate < today) {
+                        status = 'overdue';
+                    } else if (nextReviewDate === today) {
+                        status = 'today';
+                    }
+                }
+                
+                const topicCard = document.createElement('div');
+                topicCard.className = 'topic-card';
+                
+                let suspendBtn = '';
+                if (topic.suspended) {
+                    suspendBtn = `<button class="btn-unsuspend" data-index="${index}"><i class="fas fa-play"></i> Retomar</button>`;
+                } else {
+                    suspendBtn = `<button class="btn-suspend" data-index="${index}"><i class="fas fa-pause"></i> Suspender</button>`;
+                }
+                
+                const accuracy = topic.questions > 0 ? Math.round((topic.correct / topic.questions) * 100) : 0;
+                
+                topicCard.innerHTML = `
+                    <div class="topic-card-header">
+                        <h4>${escapeHtml(topic.nome)}</h4>
+                        <div>
+                            <button class="edit-topic-btn" data-index="${index}" title="Editar assunto">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-topic-btn" data-index="${index}" title="Remover assunto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="material">${escapeHtml(topic.material || 'Sem material especificado')}</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="value">${topic.questions || 0}</span>
+                            <span class="label">Questões</span>
+                        </div>
+                        <div class="stat">
+                            <span class="value" style="color: ${topic.correct > topic.incorrect ? '#27AE60' : '#C0392B'}">${topic.correct || 0}</span>
+                            <span class="label">Acertos</span>
+                        </div>
+                        <div class="stat">
+                            <span class="value">${topic.incorrect || 0}</span>
+                            <span class="label">Erros</span>
+                        </div>
+                        <div class="stat">
+                            <span class="value">${accuracy}%</span>
+                            <span class="label">Acurácia</span>
+                        </div>
+                    </div>
+                    <div class="review-details">
+                        <span><i class="fas fa-history"></i> ${topic.repetitions} revisões</span>
+                        <span><i class="fas fa-calendar-alt"></i> Próxima: ${formatDate(topic.nextReviewDate) || 'Sem data'} ${status === 'overdue' ? '(Atrasado)' : status === 'today' ? '(Para hoje)' : ''}</span>
+                    </div>
+                    <div class="topic-actions">
+                        ${suspendBtn}
+                        <button class="btn-review" data-index="${index}">
+                            <i class="fas fa-edit"></i> Revisar
+                        </button>
+                    </div>
+                `;
+                
+                if (topic.suspended) {
+                    yellowTopics.appendChild(topicCard);
+                } else if (status === 'overdue' || status === 'today') {
+                    redTopics.appendChild(topicCard);
+                } else {
+                    greenTopics.appendChild(topicCard);
+                }
+            });
+            
+            // Event listeners
+            document.querySelectorAll('.btn-review').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentTopicIndex = parseInt(e.target.closest('.btn-review').dataset.index);
+                    openProgressModal();
+                });
+            });
+            
+            document.querySelectorAll('.btn-suspend').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const topicIndex = parseInt(btn.dataset.index);
+                    suspendTopic(topicIndex, true);
+                });
+            });
+            
+            document.querySelectorAll('.btn-unsuspend').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const topicIndex = parseInt(btn.dataset.index);
+                    suspendTopic(topicIndex, false);
+                });
+            });
+            
+            document.querySelectorAll('.delete-topic-btn').forEach(btn => {
+               btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const topicIndex = parseInt(btn.dataset.index);
+                    const topicName = disciplines[currentDisciplineIndex].assuntos[topicIndex].nome;
+                    showConfirmation(
+                        'Excluir Assunto', 
+                        `Tem certeza que deseja excluir o assunto "${topicName}"? Todos os dados associados serão excluídos.`,
+                        () => deleteTopic(topicIndex)
+                    );
+                });
+            });
+            
+            document.querySelectorAll('.edit-topic-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const topicIndex = parseInt(btn.dataset.index);
+                    const discipline = disciplines[currentDisciplineIndex];
+                    const topic = discipline.assuntos[topicIndex];
+                    
+                    document.getElementById('editTopicName').value = topic.nome;
+                    document.getElementById('editTopicMaterial').value = topic.material || '';
+                    document.getElementById('editTopicImportance').value = topic.importance || 3;
+                    
+                    currentEditTopicIndex = topicIndex;
+                    document.getElementById('editTopicModal').style.display = 'flex';
+                });
+            });
+        }
+        
+        function suspendTopic(topicIndex, suspend) {
+            const discipline = disciplines[currentDisciplineIndex];
+            discipline.assuntos[topicIndex].suspended = suspend;
+            saveData();
+            renderTopics();
+            showToast(suspend ? 'Assunto suspenso com sucesso!' : 'Assunto retomado com sucesso!');
+        }
+        
+        function openProgressModal() {
+            const discipline = disciplines[currentDisciplineIndex];
+            const topic = discipline.assuntos[currentTopicIndex];
+            
+            document.getElementById('questionsInput').value = topic.questions || 0;
+            document.getElementById('correctInput').value = topic.correct || 0;
+            updateEstimatedTime();
+            
+            currentDifficulty = 2;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.value) === currentDifficulty) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            const nextReviewDate = topic.nextReviewDate ? formatDate(topic.nextReviewDate) : '--/--/----';
+            document.getElementById('nextReviewDate').textContent = nextReviewDate;
+            
+            progressModal.style.display = 'flex';
+        }
+        
+        function saveProgress() {
+            const questions = parseInt(document.getElementById('questionsInput').value);
+            const correct = parseInt(document.getElementById('correctInput').value);
+            
+            if (isNaN(questions) || isNaN(correct) || questions < correct) {
+                showToast('Por favor, insira valores válidos!');
+                return;
+            }
+            
+            const discipline = disciplines[currentDisciplineIndex];
+            const topic = discipline.assuntos[currentTopicIndex];
+            
+            // Atualizar contagens
+            topic.questions = (topic.questions || 0) + questions;
+            topic.correct = (topic.correct || 0) + correct;
+            topic.incorrect = (topic.incorrect || 0) + (questions - correct);
+            
+            // Adicionar dificuldade ao histórico
+            topic.difficultyHistory.push(currentDifficulty);
+            
+            // Calcular acurácia atual
+            const accuracy = topic.questions > 0 ? (topic.correct / topic.questions) * 100 : 0;
+            
+            // Calcular próxima data de revisão usando o sistema de desempenho
+            const nextReviewDate = calculateNextReviewDate(topic, currentDifficulty, accuracy);
+            topic.nextReviewDate = nextReviewDate;
+            topic.lastReviewed = getToday();
+            topic.repetitions = (topic.repetitions || 0) + 1;
+            
+            // Atualizar intervalo
+            topic.interval = getPerformanceBasedInterval(accuracy);
+            
+            // Incrementar contador de revisões diárias
+            dailyCompletedReviews++;
+            localStorage.setItem('dailyCompletedReviews', dailyCompletedReviews);
+            localStorage.setItem('lastReviewDate', new Date().toISOString().split('T')[0]);
+            updateDailyProgress();
+            
+            saveData();
+            
+            const currentTab = document.querySelector('.tab-content.active').id;
+            if (currentTab === 'reviews') {
+                renderReviewList();
+            } else {
+                renderTopics();
+            }
+            
+            showToast('Progresso registrado com sucesso!');
+            progressModal.style.display = 'none';
+        }
+        
+        function updateEstimatedTime() {
+            const questions = parseInt(document.getElementById('questionsInput').value) || 0;
+            const correct = parseInt(document.getElementById('correctInput').value) || 0;
+            
+            if (questions === 0) {
+                document.getElementById('estimatedTime').textContent = '20 min';
+                return;
+            }
+            
+            const accuracy = correct / questions;
+            const time = Math.pow(1.8, (1 - accuracy)) * 20;
+            const roundedTime = Math.min(Math.max(Math.round(time), 20), 50);
+            
+            document.getElementById('estimatedTime').textContent = `${roundedTime} min`;
+        }
+        
+        function updateDailyProgress() {
+            const progressPercentage = Math.min(100, (dailyCompletedReviews / dailyReviewGoal) * 100);
+            dailyProgress.style.width = `${progressPercentage}%`;
+            progressText.textContent = `${dailyCompletedReviews}/${dailyReviewGoal} revisões completadas`;
+        }
+        
+        function addDiscipline() {
+            const name = escapeHtml(document.getElementById('disciplineName').value.trim());
+            
+            if (!name) {
+                showToast('Por favor, insira um nome para a disciplina!');
+                return;
+            }
+            
+            disciplines.push({
+                name: name,
+                assuntos: []
+            });
+            
+            saveData();
+            renderDisciplines();
+            updateDisciplineSelect();
+            document.getElementById('disciplineName').value = '';
+            showToast('Disciplina adicionada com sucesso!');
+            showTab('disciplines');
+        }
+        
+        function addTopic() {
+            const disciplineIndex = document.getElementById('topicDiscipline').value;
+            const name = escapeHtml(document.getElementById('topicName').value.trim());
+            const material = escapeHtml(document.getElementById('topicMaterial').value.trim());
+            const importance = parseInt(document.getElementById('topicImportance').value) || 3;
+            
+            if (!disciplineIndex) {
+                showToast('Por favor, selecione uma disciplina!');
+                return;
+            }
+            
+            if (!name) {
+                showToast('Por favor, insira um nome para o assunto!');
+                return;
+            }
+            
+            const today = getToday();
+            const ninetyDaysAgo = today - (90 * 24 * 60 * 60 * 1000);
+            
+            const newTopic = {
+                nome: name,
+                material: material,
+                importance: importance,
+                questions: 0,
+                correct: 0,
+                incorrect: 0,
+                repetitions: 0,
+                interval: 2,
+                nextReviewDate: ninetyDaysAgo, // Status: ATRASADO
+                lastReviewed: null,
+                difficultyHistory: [],
+                suspended: false,
+                reviewMethod: 'performance'
+            };
+            
+            disciplines[disciplineIndex].assuntos.push(newTopic);
+            
+            saveData();
+            renderDisciplines();
+            updateDisciplineSelect();
+            document.getElementById('topicName').value = '';
+            document.getElementById('topicMaterial').value = '';
+            document.getElementById('topicImportance').value = '3';
+            showToast('Assunto adicionado com sucesso!');
+            showTab('disciplines');
+        }
+        
+        function saveEditedTopic() {
+            const name = escapeHtml(document.getElementById('editTopicName').value.trim());
+            const material = escapeHtml(document.getElementById('editTopicMaterial').value.trim());
+            const importance = parseInt(document.getElementById('editTopicImportance').value) || 3;
+            
+            if (!name) {
+                showToast('Por favor, insira um nome para o assunto!');
+                return;
+            }
+            
+            const discipline = disciplines[currentDisciplineIndex];
+            const topic = discipline.assuntos[currentEditTopicIndex];
+            
+            topic.nome = name;
+            topic.material = material;
+            topic.importance = importance;
+            
+            saveData();
+            renderTopics();
+            document.getElementById('editTopicModal').style.display = 'none';
+            showToast('Assunto atualizado com sucesso!');
+        }
+        
+        function deleteDiscipline(index) {
+            disciplines.splice(index, 1);
+            saveData();
+            renderDisciplines();
+            updateDisciplineSelect();
+            showToast('Disciplina removida com sucesso!');
+            confirmationModal.style.display = 'none';
+        }
+        
+        function deleteTopic(topicIndex) {
+            const discipline = disciplines[currentDisciplineIndex];
+            discipline.assuntos.splice(topicIndex, 1);
+            saveData();
+            renderTopics();
+            showToast('Assunto removido com sucesso!');
+            confirmationModal.style.display = 'none';
+        }
+        
+        function updateDisciplineSelect() {
+            const select = document.getElementById('topicDiscipline');
+            select.innerHTML = '<option value="">Selecione uma disciplina</option>';
+            
+            disciplines.forEach((discipline, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = discipline.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function countTopicsForReview(discipline) {
+            if (!discipline.assuntos || discipline.assuntos.length === 0) return 0;
+            
+            const today = getToday();
+            let count = 0;
+            
+            discipline.assuntos.forEach(topic => {
+                if (topic.suspended) return;
+                
+                if (topic.nextReviewDate && topic.nextReviewDate <= today) {
+                    count++;
+                }
+            });
+            
+            return count;
+        }
+        
+        function renderReviewList() {
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+            
+            const today = getToday();
+            let pendingTopics = [];
+            
+            // Coletar todos os assuntos atrasados
+            disciplines.forEach(discipline => {
+                if (!discipline.assuntos) return;
+                
+                discipline.assuntos.forEach(topic => {
+                    if (topic.suspended) return;
+                    
+                    if (topic.nextReviewDate && topic.nextReviewDate <= today) {
+                        pendingTopics.push({
+                            discipline,
+                            topic,
+                            priority: topic.importance * 10 // Prioridade baseada na importância
+                        });
+                    }
+                });
+            });
+            
+            // Ordenar usando o sistema intercalado
+            const interleavedTopics = getInterleavedReviewOrder(pendingTopics);
+            
+            // Limitar pela meta diária
+            const sessionTopics = interleavedTopics.slice(0, dailyReviewGoal);
+            
+            // Calcular tempo estimado
+            const sessionTime = sessionTopics.reduce((sum, item) => {
+                return sum + (2.5 * item.topic.importance);
+            }, 0);
+            document.getElementById('sessionTimeEstimate').textContent = 
+                `${Math.round(sessionTime)} minutos`;
+            
+            if (sessionTopics.length === 0) {
+                reviewList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Nenhuma revisão pendente</h3>
+                        <p>Parabéns! Você está em dia com suas revisões.</p>
+                    </div>
+                `;
+            } else {
+                sessionTopics.forEach((item, index) => {
+                    const { discipline, topic } = item;
+                    const isOverdue = topic.nextReviewDate < today;
+                    const accuracy = topic.questions > 0 ? Math.round((topic.correct / topic.questions) * 100) : 0;
+                    
+                    const topicCard = document.createElement('div');
+                    topicCard.className = 'topic-card review-card';
+                    
+                    // Indicador visual da ordem intercalada
+                    const orderIndicator = document.createElement('div');
+                    orderIndicator.style.cssText = `
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: var(--primary-blue);
+                        color: white;
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.8rem;
+                        font-weight: bold;
+                    `;
+                    orderIndicator.textContent = index + 1;
+                    
+                    topicCard.innerHTML = `
+                        <h4>${escapeHtml(discipline.name)} - ${escapeHtml(topic.nome)}</h4>
+                        <p class="material">${escapeHtml(topic.material || 'Sem material especificado')}</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="value">${topic.questions || 0}</span>
+                                <span class="label">Questões</span>
+                            </div>
+                            <div class="stat">
+                                <span class="value" style="color: ${topic.correct > topic.incorrect ? '#27AE60' : '#C0392B'}">${topic.correct || 0}</span>
+                                <span class="label">Acertos</span>
+                            </div>
+                            <div class="stat">
+                                <span class="value">${accuracy}%</span>
+                                <span class="label">Acurácia</span>
+                            </div>
+                        </div>
+                        <div class="review-details">
+                            <span><i class="fas fa-history"></i> ${topic.repetitions} revisões</span>
+                            <span><i class="fas fa-calendar-alt"></i> ${formatDate(topic.nextReviewDate)} ${isOverdue ? '(Atrasado)' : ''}</span>
+                            <span><i class="fas fa-sync-alt"></i> Intervalo: ${topic.interval} dias</span>
+                        </div>
+                        <button class="btn-review" data-discipline="${disciplines.indexOf(discipline)}" data-topic="${discipline.assuntos.indexOf(topic)}">
+                            <i class="fas fa-edit"></i> Revisar
+                        </button>
+                    `;
+                    
+                    topicCard.appendChild(orderIndicator);
+                    topicCard.style.position = 'relative';
+                    reviewList.appendChild(topicCard);
+                });
+            }
+            
+            // Event listeners para os botões de revisão
+            document.querySelectorAll('.btn-review').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const disciplineIndex = parseInt(btn.dataset.discipline);
+                    const topicIndex = parseInt(btn.dataset.topic);
+                    currentDisciplineIndex = disciplineIndex;
+                    currentTopicIndex = topicIndex;
+                    openProgressModal();
+                });
+            });
+        }
+        
+        // Dashboard Functions
+        function renderDashboard() {
+            const stats = calculateStatistics();
+            
+            document.getElementById('totalQuestions').textContent = stats.totalQuestions;
+            document.getElementById('totalCorrect').textContent = stats.totalCorrect;
+            document.getElementById('totalIncorrect').textContent = stats.totalIncorrect;
+            document.getElementById('pendingReviews').textContent = stats.pendingReviews;
+            document.getElementById('completedReviews').textContent = stats.completedReviews;
+            document.getElementById('overallAccuracy').textContent = stats.overallAccuracy + '%';
+            
+            disciplineFilter.innerHTML = '<option value="">Todas as disciplinas</option>';
+            disciplines.forEach(discipline => {
+                const option = document.createElement('option');
+                option.value = discipline.name;
+                option.textContent = discipline.name;
+                disciplineFilter.appendChild(option);
+            });
+            
+            renderPerformanceChart('accuracy', stats);
+            renderDistributionChart(stats);
+            renderStatsTable(stats.subjects);
+        }
+        
+        function calculateStatistics() {
+            let totalQuestions = 0;
+            let totalCorrect = 0;
+            let totalIncorrect = 0;
+            let pendingReviews = 0;
+            let completedReviews = 0;
+            const subjects = [];
+            const disciplineStats = {};
+            const today = getToday();
+            
+            disciplines.forEach(discipline => {
+                if (!discipline.assuntos) return;
+                
+                disciplineStats[discipline.name] = {
+                    questions: 0,
+                    correct: 0,
+                    incorrect: 0,
+                    accuracy: 0,
+                    pendingReviews: 0,
+                    completedReviews: 0
+                };
+                
+                discipline.assuntos.forEach(topic => {
+                    const subjectStats = {
+                        discipline: discipline.name,
+                        topic: topic.nome,
+                        questions: topic.questions || 0,
+                        correct: topic.correct || 0,
+                        incorrect: topic.incorrect || 0,
+                        accuracy: 0,
+                        interval: topic.interval || 2,
+                        repetitions: topic.repetitions || 0
+                    };
+                    
+                    if (subjectStats.questions > 0) {
+                        subjectStats.accuracy = Math.round((subjectStats.correct / subjectStats.questions) * 100);
+                    }
+                    
+                    subjects.push(subjectStats);
+                    
+                    totalQuestions += subjectStats.questions;
+                    totalCorrect += subjectStats.correct;
+                    totalIncorrect += subjectStats.incorrect;
+                    
+                    if (topic.nextReviewDate && !topic.suspended) {
+                        if (topic.nextReviewDate <= today) {
+                            pendingReviews++;
+                            disciplineStats[discipline.name].pendingReviews++;
+                        } else {
+                            completedReviews++;
+                            disciplineStats[discipline.name].completedReviews++;
+                        }
+                    }
+                    
+                    disciplineStats[discipline.name].questions += subjectStats.questions;
+                    disciplineStats[discipline.name].correct += subjectStats.correct;
+                    disciplineStats[discipline.name].incorrect += subjectStats.incorrect;
+                });
+            });
+            
+            Object.keys(disciplineStats).forEach(discipline => {
+                const stats = disciplineStats[discipline];
+                if (stats.questions > 0) {
+                    stats.accuracy = Math.round((stats.correct / stats.questions) * 100);
+                }
+            });
+            
+            let overallAccuracy = 0;
+            if (totalQuestions > 0) {
+                overallAccuracy = Math.round((totalCorrect / totalQuestions) * 100);
+            }
+            
+            return {
+                totalQuestions,
+                totalCorrect,
+                totalIncorrect,
+                pendingReviews,
+                completedReviews,
+                overallAccuracy,
+                subjects,
+                disciplineStats
+            };
+        }
+        
+        function renderPerformanceChart(type, stats) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+            
+            const disciplineNames = Object.keys(stats.disciplineStats);
+            const data = [];
+            const backgroundColors = [];
+            const labels = [];
+            
+            const getRandomColor = () => {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            };
+            
+            switch(type) {
+                case 'accuracy':
+                    disciplineNames.forEach(discipline => {
+                        const accuracy = stats.disciplineStats[discipline].accuracy;
+                        data.push(accuracy);
+                        labels.push(`${discipline} (${accuracy}%)`);
+                        const color = getRandomColor();
+                        backgroundColors.push(color + '80');
+                    });
+                    
+                    performanceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Acurácia (%)',
+                                data: data,
+                                backgroundColor: backgroundColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                title: {
+                                    display: true,
+                                    text: 'Acurácia por Disciplina',
+                                    color: '#2C3E50',
+                                    font: { size: 16 }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                        color: '#7F8C8D',
+                                        callback: function(value) { return value + '%'; }
+                                    },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                },
+                                x: {
+                                    ticks: { color: '#7F8C8D' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'questions':
+                    disciplineNames.forEach(discipline => {
+                        const questions = stats.disciplineStats[discipline].questions;
+                        data.push(questions);
+                        labels.push(discipline);
+                        const color = getRandomColor();
+                        backgroundColors.push(color + '80');
+                    });
+                    
+                    performanceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Questões Respondidas',
+                                data: data,
+                                backgroundColor: backgroundColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                title: {
+                                    display: true,
+                                    text: 'Questões por Disciplina',
+                                    color: '#2C3E50',
+                                    font: { size: 16 }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: '#7F8C8D' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                },
+                                x: {
+                                    ticks: { color: '#7F8C8D' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'reviews':
+                    disciplineNames.forEach(discipline => {
+                        const pending = stats.disciplineStats[discipline].pendingReviews;
+                        const completed = stats.disciplineStats[discipline].completedReviews;
+                        data.push(pending, completed);
+                    });
+                    
+                    performanceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: disciplineNames,
+                            datasets: [
+                                {
+                                    label: 'Revisões Pendentes',
+                                    data: disciplineNames.map(d => stats.disciplineStats[d].pendingReviews),
+                                    backgroundColor: 'rgba(255, 152, 0, 0.8)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Revisões Concluídas',
+                                    data: disciplineNames.map(d => stats.disciplineStats[d].completedReviews),
+                                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Revisões por Disciplina',
+                                    color: '#2C3E50',
+                                    font: { size: 16 }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: '#7F8C8D' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                },
+                                x: {
+                                    ticks: { color: '#7F8C8D' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                }
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
+        
+        function renderDistributionChart(stats) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            
+            if (distributionChart) {
+                distributionChart.destroy();
+            }
+            
+            const disciplineNames = Object.keys(stats.disciplineStats);
+            const data = disciplineNames.map(d => stats.disciplineStats[d].questions);
+            const backgroundColors = [];
+            
+            for (let i = 0; i < disciplineNames.length; i++) {
+                const hue = (i * 360) / disciplineNames.length;
+                backgroundColors.push(`hsl(${hue}, 70%, 60%)`);
+            }
+            
+            distributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: disciplineNames,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#2C3E50' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Estudo',
+                            color: '#2C3E50',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} questões (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderStatsTable(subjects) {
+            statsTableBody.innerHTML = '';
+            statsData = subjects;
+            
+            subjects.sort((a, b) => {
+                let result = 0;
+                
+                if (sortColumn === 'discipline') {
+                    result = a.discipline.localeCompare(b.discipline);
+                } else if (sortColumn === 'topic') {
+                    result = a.topic.localeCompare(b.topic);
+                } else if (sortColumn === 'questions') {
+                    result = a.questions - b.questions;
+                } else if (sortColumn === 'correct') {
+                    result = a.correct - b.correct;
+                } else if (sortColumn === 'incorrect') {
+                    result = a.incorrect - b.incorrect;
+                } else if (sortColumn === 'accuracy') {
+                    result = a.accuracy - b.accuracy;
+                } else if (sortColumn === 'interval') {
+                    result = a.interval - b.interval;
+                }
+                
+                return sortDirection === 'asc' ? result : -result;
+            });
+            
+            subjects.forEach(subject => {
+                const row = document.createElement('tr');
+                
+                let accuracyClass = '';
+                if (subject.accuracy >= 80) accuracyClass = 'accuracy-high';
+                else if (subject.accuracy >= 60) accuracyClass = 'accuracy-medium';
+                else accuracyClass = 'accuracy-low';
+                
+                row.innerHTML = `
+                    <td>${subject.discipline}</td>
+                    <td>${subject.topic}</td>
+                    <td>${subject.questions}</td>
+                    <td>${subject.correct}</td>
+                    <td>${subject.incorrect}</td>
+                    <td class="accuracy-cell ${accuracyClass}">${subject.accuracy}%</td>
+                    <td>${subject.interval}</td>
+                `;
+                
+                statsTableBody.appendChild(row);
+            });
+        }
+        
+        function sortTable(column) {
+            if (column === sortColumn) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            const stats = calculateStatistics();
+            renderStatsTable(stats.subjects);
+        }
+        
+        function filterTable() {
+            const disciplineValue = disciplineFilter.value;
+            const accuracyValue = accuracyFilter.value;
+            const searchTerm = tableSearch.value.toLowerCase();
+            
+            const filtered = statsData.filter(subject => {
+                if (disciplineValue && subject.discipline !== disciplineValue) {
+                    return false;
+                }
+                
+                if (accuracyValue) {
+                    switch(accuracyValue) {
+                        case '80':
+                            if (subject.accuracy < 80) return false;
+                            break;
+                        case '60':
+                            if (subject.accuracy < 60) return false;
+                            break;
+                        case '50':
+                            if (subject.accuracy < 50) return false;
+                            break;
+                        case 'below50':
+                            if (subject.accuracy >= 50) return false;
+                            break;
+                        case 'below40':
+                            if (subject.accuracy >= 40) return false;
+                            break;
+                        case 'below20':
+                            if (subject.accuracy >= 20) return false;
+                            break;
+                    }
+                }
+                
+                if (searchTerm && 
+                    !subject.discipline.toLowerCase().includes(searchTerm) && 
+                    !subject.topic.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            renderStatsTable(filtered);
+        }
+        
+        function showConfirmation(title, message, callback) {
+            confirmationTitle.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${title}`;
+            confirmationMessage.textContent = message;
+            confirmBtn.onclick = callback;
+            confirmationModal.style.display = 'flex';
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = themeToggle.querySelector('i');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            showToast(`Tema alterado para ${newTheme === 'dark' ? 'escuro' : 'claro'}`);
+        }
+        
+        function saveData() {
+            localStorage.setItem('disciplines', JSON.stringify(disciplines));
+        }
+        
+        function showTab(tabId) {
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'reviews') {
+                renderReviewList();
+            } else if (tabId === 'dashboard') {
+                renderDashboard();
+            }
+        }
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function setupEventListeners() {
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    showTab(btn.dataset.tab);
+                });
+            });
+            
+            backToDisciplinesBtn.addEventListener('click', () => {
+                showTab('disciplines');
+            });
+            
+            document.getElementById('addDisciplineBtn').addEventListener('click', addDiscipline);
+            document.getElementById('addTopicBtn').addEventListener('click', addTopic);
+            document.getElementById('saveEditTopicBtn').addEventListener('click', saveEditedTopic);
+            
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    progressModal.style.display = 'none';
+                    confirmationModal.style.display = 'none';
+                    document.getElementById('goalConfigModal').style.display = 'none';
+                    document.getElementById('editTopicModal').style.display = 'none';
+                });
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                confirmationModal.style.display = 'none';
+            });
+            
+            document.getElementById('saveProgressBtn').addEventListener('click', saveProgress);
+            document.getElementById('questionsInput').addEventListener('input', updateEstimatedTime);
+            document.getElementById('correctInput').addEventListener('input', updateEstimatedTime);
+            
+            window.addEventListener('click', (e) => {
+                if (e.target === progressModal) {
+                    progressModal.style.display = 'none';
+                }
+                if (e.target === confirmationModal) {
+                    confirmationModal.style.display = 'none';
+                }
+                if (e.target === document.getElementById('goalConfigModal')) {
+                    document.getElementById('goalConfigModal').style.display = 'none';
+                }
+                if (e.target === document.getElementById('editTopicModal')) {
+                    document.getElementById('editTopicModal').style.display = 'none';
+                }
+            });
+            
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    difficultyBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('pulse');
+                    });
+                    
+                    btn.classList.add('active');
+                    btn.classList.add('pulse');
+                    
+                    setTimeout(() => {
+                        btn.classList.remove('pulse');
+                    }, 500);
+                    
+                    currentDifficulty = parseInt(btn.dataset.value);
+                    showToast(`Dificuldade definida como: ${btn.textContent.trim()}`);
+                });
+            });
+            
+            document.querySelectorAll('.chart-filters .btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.chart-filters .btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    const stats = calculateStatistics();
+                    renderPerformanceChart(btn.dataset.chart, stats);
+                });
+            });
+            
+            document.querySelectorAll('.stats-table th').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortTable(th.dataset.sort);
+                });
+            });
+            
+            disciplineFilter.addEventListener('change', filterTable);
+            accuracyFilter.addEventListener('change', filterTable);
+            tableSearch.addEventListener('input', filterTable);
+            
+            document.getElementById('reviewGoalConfig').addEventListener('click', () => {
+                document.getElementById('dailyGoalInput').value = dailyReviewGoal;
+                document.getElementById('goalConfigModal').style.display = 'flex';
+            });
+            
+            document.getElementById('saveGoalBtn').addEventListener('click', () => {
+                const newGoal = parseInt(document.getElementById('dailyGoalInput').value);
+                if (newGoal > 0) {
+                    dailyReviewGoal = newGoal;
+                    localStorage.setItem('dailyReviewGoal', dailyReviewGoal);
+                    updateDailyProgress();
+                    document.getElementById('goalConfigModal').style.display = 'none';
+                    showToast('Meta diária atualizada!');
+                } else {
+                    showToast('Por favor, insira um número válido (maior que zero).');
+                }
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+        }
+    </script>
+</body>
+</html>

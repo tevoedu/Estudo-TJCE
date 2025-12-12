@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Educacional - Sistema Completo</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --bg-card: rgba(30, 41, 59, 0.8);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --bg-glass-dark: rgba(15, 23, 42, 0.9);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --border-radius: 16px;
+      --border-radius-sm: 8px;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    /* Animações globais */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+    }
+
+    .fade-in {
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+
+    .fade-out {
+      animation: fadeOut var(--transition-normal) forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft var(--transition-normal) forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight var(--transition-normal) forwards;
+    }
+
+    /* Estilos para o hub principal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100%;
+      background-color: var(--bg-secondary);
+      padding: 1.5rem;
+      z-index: 1000;
+      transition: transform var(--transition-normal), width var(--transition-normal);
+      box-shadow: var(--shadow-lg);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.minimized {
+      width: 70px;
+    }
+
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-btn:hover {
+      background: var(--bg-glass);
+      transform: scale(1.1);
+    }
+
+    .panel-title {
+      margin-left: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      transition: opacity var(--transition-normal);
+      color: var(--text-primary);
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .modal.minimized .panel-title {
+      opacity: 0;
+    }
+
+    .menu {
+      list-style: none;
+      flex-grow: 1;
+    }
+
+    .menu li {
+      margin: 0.5rem 0;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--text-secondary);
+      border-radius: var(--border-radius-sm);
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu li a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--accent-gradient);
+      opacity: 0.1;
+      transition: left var(--transition-normal);
+    }
+
+    .menu li a:hover::before,
+    .menu li a:focus::before,
+    .menu li a.active::before {
+      left: 0;
+    }
+
+    .menu li a:hover,
+    .menu li a:focus {
+      color: var(--text-primary);
+      transform: translateX(5px);
+    }
+
+    .menu li a.active {
+      color: var(--text-primary);
+      background: var(--bg-glass);
+    }
+
+    .menu li a i {
+      width: 24px;
+      text-align: center;
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      transition: transform var(--transition-normal);
+    }
+
+    .menu li a:hover i,
+    .menu li a.active i {
+      transform: scale(1.2);
+    }
+
+    .menu li a span {
+      transition: opacity var(--transition-normal);
+      font-weight: 500;
+    }
+
+    .modal.minimized .menu li a span {
+      opacity: 0;
+    }
+
+    .content {
+      flex: 1;
+      margin-left: 280px;
+      height: 100vh;
+      transition: margin-left var(--transition-normal);
+      position: relative;
+      z-index: 100;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 25%);
+    }
+
+    .content.minimized {
+      margin-left: 70px;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 10;
+    }
+
+    .loader.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg-primary);
+    }
+
+    .notification {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      z-index: 10000;
+      transform: translateX(150%);
+      transition: transform var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-left: 4px solid var(--accent-primary);
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      border-left-color: var(--success-color);
+    }
+    
+    .notification.error {
+      border-left-color: var(--error-color);
+    }
+    
+    .notification i {
+      font-size: 1.25rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Botão para voltar ao hub */
+    .back-to-hub {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1010;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+    
+    .back-to-hub:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .modal {
+        width: 100%;
+        transform: translateX(-100%);
+      }
+      
+      .modal.active {
+        transform: translateX(0);
+      }
+      
+      .content {
+        margin-left: 0;
+      }
+      
+      .content.minimized {
+        margin-left: 0;
+      }
+    }
+    
+    /* Efeitos de glassmorphism */
+    .glass {
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .glass-dark {
+      background: var(--bg-glass-dark);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Conteúdo principal -->
+  <nav class="modal glass" id="modalMenu" aria-label="Menu principal">
+    <div class="modal-content">
+      <div class="header">
+        <button class="toggle-btn" aria-label="Alternar menu" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="panel-title">Painel</span>
+      </div>
+      <ul class="menu">
+        <li><a href="#home" data-title="Home" onclick="loadContent('home')" class="active">
+          <i class="fas fa-home"></i><span>Home</span>
+        </a></li>
+        <li><a href="#chatboot" data-title="Chatboot" onclick="loadContent('chatboot')">
+          <i class="fas fa-robot"></i><span>Chatboot</span>
+        </a></li>
+        <li><a href="#cronograma" data-title="Cronograma" onclick="loadContent('cronograma')">
+          <i class="fas fa-calendar-alt"></i><span>Cronograma</span>
+        </a></li>
+        <li><a href="#planos" data-title="Planos" onclick="loadContent('planos')">
+          <i class="fas fa-th-large"></i><span>Planos</span>
+        </a></li>
+        <li><a href="#revisoes" data-title="Revisões" onclick="loadContent('revisoes')">
+          <i class="fas fa-sync-alt"></i><span>Revisões</span>
+        </a></li>
+        <li><a href="#flashcards" data-title="Flashcards" onclick="loadContent('flashcards')">
+          <i class="fas fa-layer-group"></i><span>Flashcards</span>
+        </a></li>
+        <li><a href="#anki" data-title="Anki" onclick="loadContent('anki')">
+          <i class="fas fa-clone"></i><span>Anki</span>
+        </a></li>
+        <li><a href="#filtros" data-title="Filtros" onclick="loadContent('filtros')">
+          <i class="fas fa-filter"></i><span>Filtros</span>
+        </a></li>
+        <li><a href="#simulados" data-title="Simulados" onclick="loadContent('simulados')">
+          <i class="fas fa-clipboard-check"></i><span>Simulados</span>
+        </a></li>
+        <li><a href="#edital" data-title="Edital Verticalizado" onclick="loadContent('edital')">
+          <i class="fas fa-file-alt"></i><span>Edital Verticalizado</span>
+        </a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="content" id="contentArea">
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+    <!-- Permissões liberadas removendo o atributo sandbox -->
+    <iframe id="iframeContent" src="home.html" onload="hideLoader()"></iframe>
+  </main>
+
+  <div id="notification" class="notification glass">
+    <i class="fas fa-check-circle"></i>
+    <span></span>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Sistema carregado - Iniciando hub educacional...');
+      activateSystem();
+    });
+
+    // Função para ativar o sistema (mostrar o hub)
+    function activateSystem() {
+      console.log('Ativando sistema principal...');
+      const modalMenu = document.getElementById("modalMenu");
+      const contentArea = document.getElementById("contentArea");
+      
+      // Mostra o sistema principal
+      modalMenu.style.display = 'block';
+      contentArea.style.display = 'block';
+      
+      // Configura o sistema principal
+      setupMainSystem();
+      
+      console.log('Sistema principal ativado com sucesso');
+    }
+
+    // Configura o sistema principal
+    function setupMainSystem() {
+      const savedState = localStorage.getItem('menuState');
+      const modal = document.getElementById('modalMenu');
+
+      if (savedState === 'minimized') {
+        modal.classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+      
+      // Para dispositivos móveis, adicionar toggle ao menu
+      if (window.innerWidth <= 768) {
+        modal.classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+      
+      console.log('Sistema principal configurado');
+    }
+
+    // Funções do sistema principal
+    function toggleSidebar() {
+      const modal = document.getElementById('modalMenu');
+      const content = document.getElementById('contentArea');
+
+      modal.classList.toggle('minimized');
+      content.classList.toggle('minimized');
+
+      const newState = modal.classList.contains('minimized') ? 'minimized' : 'expanded';
+      localStorage.setItem('menuState', newState);
+    }
+
+    function loadContent(page) {
+      console.log('Carregando conteúdo:', page);
+      const iframe = document.getElementById('iframeContent');
+      const loader = document.getElementById('loader');
+      const links = document.querySelectorAll('.menu li a');
+
+      loader.classList.add('active');
+
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${page}`) {
+          link.classList.add('active');
+        }
+      });
+
+      iframe.src = `${page}.html`;
+      
+      // Para dispositivos móveis, fechar o menu após selecionar uma opção
+      if (window.innerWidth <= 768) {
+        toggleSidebar();
+      }
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.remove('active');
+    }
+    
+    // Função para mostrar notificação
+    function showNotification(message, type) {
+      const notification = document.getElementById('notification');
+      const icon = notification.querySelector('i');
+      const text = notification.querySelector('span');
+      
+      text.textContent = message;
+      notification.className = `notification ${type} glass`;
+      
+      // Configurar ícone correto
+      if (type === 'success') {
+        icon.className = 'fas fa-check-circle';
+      } else {
+        icon.className = 'fas fa-exclamation-circle';
+      }
+      
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Adicionar evento de redimensionamento para responsividade
+    window.addEventListener('resize', function() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('modalMenu').classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+    });
+    
+    // Fallback para garantir que o sistema não trave
+    window.addEventListener('error', function(e) {
+      console.error('Erro capturado:', e.error);
+    });
+  </script>
+</body>
+</html>
