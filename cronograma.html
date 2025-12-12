@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Estudos Interativo</title>
+    <style>
+        /* Reset e configurações gerais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Tema escuro padrão */
+        :root {
+            --primary-color: #4a6fa5;
+            --primary-dark: #3a5a8a;
+            --secondary-color: #6d9dc5;
+            --background-color: #121212;
+            --surface-color: #1e1e1e;
+            --card-color: #252525;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --border-color: #3a3a3a;
+            --success-color: #4caf50;
+            --success-light: rgba(76, 175, 80, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Cartão principal */
+        .main-card {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 25px;
+            padding: 25px;
+        }
+
+        /* Barra de progresso */
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .progress-bar-container {
+            height: 12px;
+            background-color: var(--card-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Navegação entre dias */
+        .day-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            background-color: var(--card-color);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-primary);
+        }
+
+        .day-info {
+            text-align: center;
+        }
+
+        .day-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .day-counter {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Conteúdos do dia */
+        .day-contents {
+            margin-bottom: 30px;
+        }
+
+        .day-complete-message {
+            background-color: var(--success-light);
+            color: var(--success-color);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--success-color);
+            display: none;
+        }
+
+        .content-item {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .content-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-item.completed {
+            border-left-color: var(--success-color);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .checkbox-container {
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .custom-checkbox.checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .custom-checkbox svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .custom-checkbox.checked svg {
+            opacity: 1;
+        }
+
+        .content-text {
+            flex: 1;
+        }
+
+        .content-discipline {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-topic {
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .main-card {
+                padding: 20px;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .stat-box {
+                min-width: 100%;
+            }
+            
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .day-title {
+                font-size: 1.3rem;
+            }
+            
+            .content-item {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .nav-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .day-title {
+                font-size: 1.2rem;
+            }
+            
+            .content-topic {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cronograma de Estudos Interativo</h1>
+            <p class="subtitle">Acompanhe seu progresso de forma dinâmica e organizada</p>
+        </header>
+        
+        <div class="main-card">
+            <!-- Barra de progresso e estatísticas -->
+            <section class="progress-section">
+                <div class="progress-info">
+                    <span>Progresso Geral</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="completed-days">0</div>
+                        <div class="stat-label">Dias Concluídos</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="remaining-days">66</div>
+                        <div class="stat-label">Dias Restantes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="total-days">66</div>
+                        <div class="stat-label">Total de Dias</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Navegação entre dias -->
+            <section class="day-navigation">
+                <button class="nav-btn" id="prev-day" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                </button>
+                
+                <div class="day-info">
+                    <div class="day-title" id="current-day-title">Dia 1</div>
+                    <div class="day-counter" id="day-counter">Dia 1 de 66</div>
+                </div>
+                
+                <button class="nav-btn" id="next-day">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                    </svg>
+                </button>
+            </section>
+            
+            <!-- Conteúdos do dia -->
+            <section class="day-contents">
+                <div class="day-complete-message" id="day-complete-message">
+                    Todos os tópicos deste dia foram concluídos. Continue com essa dedicação!
+                </div>
+                
+                <div id="contents-container">
+                    <!-- Os conteúdos serão inseridos aqui via JavaScript -->
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Progresso salvo automaticamente • Atualize a página para continuar de onde parou</p>
+        </footer>
+    </div>
+
+    <script>
+        // Cronograma de estudos (conforme fornecido)
+        const cronograma = [
+            { 
+                dia: "Dia 1",
+                conteudos: [
+                    "Noções de Direito Constitucional — Constituição da República Federativa do Brasil de 1988"
+                ]
+            },
+            {
+                dia: "Dia 2",
+                conteudos: [
+                    "Noções de Direito Administrativo — Estado, governo e administração pública. 1.1 Conceitos. 1.2 Elementos"
+                ]
+            },
+            {
+                dia: "Dia 3",
+                conteudos: [
+                    "Noções de Administração Pública — Características básicas das organizações formais modernas: tipos de estrutura organizacional, natureza, finalidades e critérios de departamentalização"
+                ]
+            },
+            {
+                dia: "Dia 4",
+                conteudos: [
+                    "Noções de Gestão Pública — Processo administrativo. 1.1 Funções de administração: planejamento, organização, direção e controle"
+                ]
+            },
+            {
+                dia: "Dia 5",
+                conteudos: [
+                    "Noções de Direito Constitucional — 1.1 Princípios fundamentais"
+                ]
+            },
+            {
+                dia: "Dia 6",
+                conteudos: [
+                    "Noções de Direito Administrativo — Direito administrativo. 2.1 Conceito. 2.2 Objeto. 2.3 Fontes"
+                ]
+            },
+            {
+                dia: "Dia 7",
+                conteudos: [
+                    "Noções de Administração Pública — Organização administrativa: centralização, descentralização, concentração e desconcentração; organização administrativa da União; administração direta e indireta"
+                ]
+            },
+            {
+                dia: "Dia 8",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.2 Processo de planejamento. 1.2.1 Planejamento estratégico: visão, missão e análise SWOT"
+                ]
+            },
+            {
+                dia: "Dia 9",
+                conteudos: [
+                    "Noções de Direito Constitucional — Aplicabilidade das normas constitucionais"
+                ]
+            },
+            {
+                dia: "Dia 10",
+                conteudos: [
+                    "Noções de Direito Administrativo — Ato administrativo. 3.1 Conceito, requisitos, atributos, classificação e espécies"
+                ]
+            },
+            {
+                dia: "Dia 11",
+                conteudos: [
+                    "Noções de Administração Pública — Gestão de processos"
+                ]
+            },
+            {
+                dia: "Dia 12",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.2.2 Análise competitiva e estratégias genéricas. 1.2.3 Redes e alianças"
+                ]
+            },
+            {
+                dia: "Dia 13",
+                conteudos: [
+                    "Noções de Direito Constitucional — 2.1 Normas de eficácia plena, contida e limitada"
+                ]
+            },
+            {
+                dia: "Dia 14",
+                conteudos: [
+                    "Noções de Direito Administrativo — 3.2 Extinção do ato administrativo: cassação, anulação, revogação e convalidação. 3.3 Decadência administrativa"
+                ]
+            },
+            {
+                dia: "Dia 15",
+                conteudos: [
+                    "Noções de Administração Pública — Gestão de contratos"
+                ]
+            },
+            {
+                dia: "Dia 16",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.2.4 Planejamento tático. 1.2.5 Planejamento operacional"
+                ]
+            },
+            {
+                dia: "Dia 17",
+                conteudos: [
+                    "Noções de Direito Constitucional — 2.2 Normas programáticas"
+                ]
+            },
+            {
+                dia: "Dia 18",
+                conteudos: [
+                    "Noções de Direito Administrativo — Agentes públicos. 4.1 Legislação pertinente. 4.1.1 Disposições constitucionais aplicáveis"
+                ]
+            },
+            {
+                dia: "Dia 19",
+                conteudos: [
+                    "Noções de Administração Pública — Noções de processos licitatórios"
+                ]
+            },
+            {
+                dia: "Dia 20",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.2.6 Administração por objetivos. 1.2.7 Balanced scorecard"
+                ]
+            },
+            {
+                dia: "Dia 21",
+                conteudos: [
+                    "Noções de Direito Constitucional — Direitos e garantias fundamentais – Parte 1 (tópico grande)"
+                ]
+            },
+            {
+                dia: "Dia 22",
+                conteudos: [
+                    "Noções de Direito Administrativo — 4.2 Disposições doutrinárias. 4.2.1 Conceito. 4.2.2 Espécies. 4.2.3 Cargo, emprego e função pública"
+                ]
+            },
+            {
+                dia: "Dia 23",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.2.8 Processo decisório"
+                ]
+            },
+            {
+                dia: "Dia 24",
+                conteudos: [
+                    "Noções de Direito Constitucional — 3.1 Direitos e deveres individuais e coletivos, direitos sociais, direitos de nacionalidade, direitos políticos, partidos políticos – Parte 2 (tópico grande, continuação)"
+                ]
+            },
+            {
+                dia: "Dia 25",
+                conteudos: [
+                    "Noções de Direito Administrativo — 4.2.4 Provimento. 4.2.5 Vacância. 4.2.6 Efetividade, estabilidade e vitaliciedade"
+                ]
+            },
+            {
+                dia: "Dia 26",
+                conteudos: [
+                    "Noções de Administração Pública — Revisão ou pausa estruturada – não há mais tópicos novos nesta disciplina"
+                ]
+            },
+            {
+                dia: "Dia 27",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.3 Organização. 1.3.1 Estrutura organizacional"
+                ]
+            },
+            {
+                dia: "Dia 28",
+                conteudos: [
+                    "Noções de Direito Constitucional — Organização político-administrativa do Estado"
+                ]
+            },
+            {
+                dia: "Dia 29",
+                conteudos: [
+                    "Noções de Direito Administrativo — 4.2.7 Remuneração. 4.2.8 Direitos e deveres"
+                ]
+            },
+            {
+                dia: "Dia 30",
+                conteudos: [
+                    "Noções de Gestão Pública — 1.3.2 Tipos de departamentalização: características, vantagens e desvantagens de cada tipo"
+                ]
+            },
+            {
+                dia: "Dia 31",
+                conteudos: [
+                    "Noções de Direito Constitucional — 4.1 Estado federal brasileiro, União, estados, Distrito Federal, municípios e territórios"
+                ]
+            },
+            {
+                dia: "Dia 32",
+                conteudos: [
+                    "Noções de Direito Administrativo — 4.2.9 Responsabilidade. 4.2.10 Processo administrativo disciplinar"
+                ]
+            },
+            {
+                dia: "Dia 33",
+                conteudos: [
+                    "Noções de Gestão Pública — 2 Comportamento organizacional: relações indivíduo/organização, motivação, liderança, desempenho"
+                ]
+            },
+            {
+                dia: "Dia 34",
+                conteudos: [
+                    "Noções de Direito Constitucional — 5 Administração pública. 5.1 Disposições gerais, servidores públicos"
+                ]
+            },
+            {
+                dia: "Dia 35",
+                conteudos: [
+                    "Noções de Direito Administrativo — 4.3 Lei de Organização Administrativa (Lei nº 16.208/2017)"
+                ]
+            },
+            {
+                dia: "Dia 36",
+                conteudos: [
+                    "Noções de Gestão Pública — 3 Competência interpessoal"
+                ]
+            },
+            {
+                dia: "Dia 37",
+                conteudos: [
+                    "Noções de Direito Constitucional — 6 Poder executivo. 6.1 Atribuições e responsabilidades do presidente da República"
+                ]
+            },
+            {
+                dia: "Dia 38",
+                conteudos: [
+                    "Noções de Direito Administrativo — 5 Poderes da administração pública. 5.1 Hierárquico, disciplinar, regulamentar e de polícia"
+                ]
+            },
+            {
+                dia: "Dia 39",
+                conteudos: [
+                    "Noções de Gestão Pública — 4 Gerenciamento de conflitos"
+                ]
+            },
+            {
+                dia: "Dia 40",
+                conteudos: [
+                    "Noções de Direito Constitucional — 7 Poder legislativo. 7.1 Estrutura. 7.2 Funcionamento e atribuições"
+                ]
+            },
+            {
+                dia: "Dia 41",
+                conteudos: [
+                    "Noções de Direito Administrativo — 5.2 Uso e abuso do poder"
+                ]
+            },
+            {
+                dia: "Dia 42",
+                conteudos: [
+                    "Noções de Direito Constitucional — 7.3 Processo legislativo. 7.4 Fiscalização contábil, financeira e orçamentária"
+                ]
+            },
+            {
+                dia: "Dia 43",
+                conteudos: [
+                    "Noções de Direito Administrativo — 6 Regime jurídico-administrativo. 6.1 Conceito. 6.2 Princípios expressos e implícitos da administração pública"
+                ]
+            },
+            {
+                dia: "Dia 44",
+                conteudos: [
+                    "Noções de Direito Constitucional — 7.5 Comissões parlamentares de inquérito"
+                ]
+            },
+            {
+                dia: "Dia 45",
+                conteudos: [
+                    "Noções de Direito Administrativo — 7 Responsabilidade civil do Estado. 7.1 Evolução histórica. 7.2 Responsabilidade civil do Estado no direito brasileiro"
+                ]
+            },
+            {
+                dia: "Dia 46",
+                conteudos: [
+                    "Noções de Direito Constitucional — 8 Poder judiciário. 8.1 Disposições gerais"
+                ]
+            },
+            {
+                dia: "Dia 47",
+                conteudos: [
+                    "Noções de Direito Administrativo — 7.2.1 Responsabilidade por ato comissivo do Estado. 7.2.2 Responsabilidade por omissão do Estado"
+                ]
+            },
+            {
+                dia: "Dia 48",
+                conteudos: [
+                    "Noções de Direito Constitucional — 8.2 Órgãos do poder judiciário"
+                ]
+            },
+            {
+                dia: "Dia 49",
+                conteudos: [
+                    "Noções de Direito Administrativo — 7.3 Requisitos para a demonstração da responsabilidade do Estado. 7.4 Causas excludentes e atenuantes da responsabilidade do Estado"
+                ]
+            },
+            {
+                dia: "Dia 50",
+                conteudos: [
+                    "Noções de Direito Constitucional — 8.2.1 Organização e competências, Conselho Nacional de Justiça"
+                ]
+            },
+            {
+                dia: "Dia 51",
+                conteudos: [
+                    "Noções de Direito Administrativo — 7.5 Reparação do dano. 7.6 Direito de regresso"
+                ]
+            },
+            {
+                dia: "Dia 52",
+                conteudos: [
+                    "Noções de Direito Constitucional — 8.2.1.1 Composição e competências"
+                ]
+            },
+            {
+                dia: "Dia 53",
+                conteudos: [
+                    "Noções de Direito Administrativo — 8 Serviços públicos. 8.1 Conceito. 8.2 Elementos constitutivos"
+                ]
+            },
+            {
+                dia: "Dia 54",
+                conteudos: [
+                    "Noções de Direito Constitucional — 9 Funções essenciais à justiça"
+                ]
+            },
+            {
+                dia: "Dia 55",
+                conteudos: [
+                    "Noções de Direito Administrativo — 8.3 Formas de prestação e meios de execução. 8.4 Delegação: concessão, permissão e autorização"
+                ]
+            },
+            {
+                dia: "Dia 56",
+                conteudos: [
+                    "Noções de Direito Constitucional — 9.1 Ministério Público, Advocacia Pública. 9.2 Defensoria Pública"
+                ]
+            },
+            {
+                dia: "Dia 57",
+                conteudos: [
+                    "Noções de Direito Administrativo — 8.5 Classificação. 8.6 Princípios"
+                ]
+            },
+            {
+                dia: "Dia 58",
+                conteudos: [
+                    "Noções de Direito Administrativo — 9 Organização administrativa. 9.1 Centralização, descentralização, concentração e desconcentração"
+                ]
+            },
+            {
+                dia: "Dia 59",
+                conteudos: [
+                    "Noções de Direito Administrativo — 9.2 Administração direta e indireta"
+                ]
+            },
+            {
+                dia: "Dia 60",
+                conteudos: [
+                    "Noções de Direito Administrativo — 9.3 Autarquias, fundações, empresas públicas e sociedades de economia mista"
+                ]
+            },
+            {
+                dia: "Dia 61",
+                conteudos: [
+                    "Noções de Direito Administrativo — 9.4 Entidades paraestatais e terceiro setor: serviços sociais autônomos, entidades de apoio, organizações sociais, organizações da sociedade civil de interesse público"
+                ]
+            },
+            {
+                dia: "Dia 62",
+                conteudos: [
+                    "Noções de Direito Administrativo — 10 Controle da administração pública. 10.1 Controle exercido pela administração pública. 10.2 Controle judicial. 10.3 Controle legislativo"
+                ]
+            },
+            {
+                dia: "Dia 63",
+                conteudos: [
+                    "Noções de Direito Administrativo — 10.4 Improbidade administrativa: Lei nº 14.320/2021"
+                ]
+            },
+            {
+                dia: "Dia 64",
+                conteudos: [
+                    "Noções de Direito Administrativo — 11 Processo administrativo. 11.1 Lei nº 9.784/1999"
+                ]
+            },
+            {
+                dia: "Dia 65",
+                conteudos: [
+                    "Noções de Direito Administrativo — 12 Licitações e contratos administrativos. 12.1 Legislação pertinente"
+                ]
+            },
+            {
+                dia: "Dia 66",
+                conteudos: [
+                    "Noções de Direito Administrativo — 12.1.1 Lei nº 14.133/2021. 12.2 Fundamentos constitucionais"
+                ]
+            }
+        ];
+
+        // Variáveis de estado
+        let currentDayIndex = 0;
+        let completedTopics = {};
+        let completedDays = 0;
+
+        // Elementos DOM
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+        const currentDayTitle = document.getElementById('current-day-title');
+        const dayCounter = document.getElementById('day-counter');
+        const contentsContainer = document.getElementById('contents-container');
+        const dayCompleteMessage = document.getElementById('day-complete-message');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const completedDaysEl = document.getElementById('completed-days');
+        const remainingDaysEl = document.getElementById('remaining-days');
+        const totalDaysEl = document.getElementById('total-days');
+
+        // Inicializar a aplicação
+        function init() {
+            // Carregar dados salvos do localStorage
+            loadProgress();
+            
+            // Configurar navegação
+            setupNavigation();
+            
+            // Exibir o dia atual
+            displayCurrentDay();
+            
+            // Atualizar estatísticas
+            updateStats();
+        }
+
+        // Carregar progresso do localStorage
+        function loadProgress() {
+            // Carregar dia atual
+            const savedDayIndex = localStorage.getItem('currentDayIndex');
+            if (savedDayIndex !== null) {
+                currentDayIndex = parseInt(savedDayIndex, 10);
+            }
+            
+            // Carregar tópicos concluídos
+            const savedTopics = localStorage.getItem('completedTopics');
+            if (savedTopics !== null) {
+                completedTopics = JSON.parse(savedTopics);
+            }
+        }
+
+        // Salvar progresso no localStorage
+        function saveProgress() {
+            localStorage.setItem('currentDayIndex', currentDayIndex);
+            localStorage.setItem('completedTopics', JSON.stringify(completedTopics));
+        }
+
+        // Configurar navegação entre dias
+        function setupNavigation() {
+            prevDayBtn.addEventListener('click', () => {
+                if (currentDayIndex > 0) {
+                    currentDayIndex--;
+                    displayCurrentDay();
+                    updateStats();
+                    saveProgress();
+                }
+            });
+            
+            nextDayBtn.addEventListener('click', () => {
+                if (currentDayIndex < cronograma.length - 1) {
+                    currentDayIndex++;
+                    displayCurrentDay();
+                    updateStats();
+                    saveProgress();
+                }
+            });
+        }
+
+        // Exibir o dia atual
+        function displayCurrentDay() {
+            const currentDay = cronograma[currentDayIndex];
+            
+            // Atualizar título e contador
+            currentDayTitle.textContent = currentDay.dia;
+            dayCounter.textContent = `Dia ${currentDayIndex + 1} de ${cronograma.length}`;
+            
+            // Atualizar estado dos botões de navegação
+            prevDayBtn.disabled = currentDayIndex === 0;
+            nextDayBtn.disabled = currentDayIndex === cronograma.length - 1;
+            
+            // Limpar container de conteúdos
+            contentsContainer.innerHTML = '';
+            
+            // Criar elementos para cada conteúdo
+            let allCompleted = true;
+            
+            currentDay.conteudos.forEach((conteudo, index) => {
+                // Extrair disciplina e tópico
+                const separatorIndex = conteudo.indexOf(" — ");
+                const disciplina = separatorIndex !== -1 ? conteudo.substring(0, separatorIndex) : "Estudo";
+                const topico = separatorIndex !== -1 ? conteudo.substring(separatorIndex + 3) : conteudo;
+                
+                // Verificar se o tópico está concluído
+                const isCompleted = isTopicCompleted(currentDayIndex, index);
+                
+                if (!isCompleted) {
+                    allCompleted = false;
+                }
+                
+                // Criar elemento do conteúdo
+                const contentItem = document.createElement('div');
+                contentItem.className = `content-item ${isCompleted ? 'completed' : ''}`;
+                
+                contentItem.innerHTML = `
+                    <div class="checkbox-container">
+                        <div class="custom-checkbox ${isCompleted ? 'checked' : ''}" data-day="${currentDayIndex}" data-topic="${index}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="content-text">
+                        <div class="content-discipline">${disciplina}</div>
+                        <div class="content-topic">${topico}</div>
+                    </div>
+                `;
+                
+                // Adicionar evento de clique na checkbox
+                const checkbox = contentItem.querySelector('.custom-checkbox');
+                checkbox.addEventListener('click', () => {
+                    toggleTopicCompletion(currentDayIndex, index);
+                });
+                
+                contentsContainer.appendChild(contentItem);
+            });
+            
+            // Mostrar ou ocultar mensagem de dia concluído
+            dayCompleteMessage.style.display = allCompleted ? 'block' : 'none';
+        }
+
+        // Verificar se um tópico está concluído
+        function isTopicCompleted(dayIndex, topicIndex) {
+            const dayKey = `dia_${dayIndex}`;
+            if (!completedTopics[dayKey]) return false;
+            
+            return completedTopics[dayKey].includes(topicIndex);
+        }
+
+        // Alternar estado de conclusão de um tópico
+        function toggleTopicCompletion(dayIndex, topicIndex) {
+            const dayKey = `dia_${dayIndex}`;
+            
+            // Inicializar array para o dia se não existir
+            if (!completedTopics[dayKey]) {
+                completedTopics[dayKey] = [];
+            }
+            
+            // Verificar se o tópico já está concluído
+            const topicIndexInArray = completedTopics[dayKey].indexOf(topicIndex);
+            
+            if (topicIndexInArray === -1) {
+                // Marcar como concluído
+                completedTopics[dayKey].push(topicIndex);
+            } else {
+                // Remover da lista de concluídos
+                completedTopics[dayKey].splice(topicIndexInArray, 1);
+            }
+            
+            // Salvar no localStorage
+            saveProgress();
+            
+            // Atualizar exibição do dia atual
+            displayCurrentDay();
+            
+            // Atualizar estatísticas
+            updateStats();
+        }
+
+        // Atualizar estatísticas e barra de progresso
+        function updateStats() {
+            // Calcular dias concluídos
+            completedDays = 0;
+            
+            for (let i = 0; i < cronograma.length; i++) {
+                const dayKey = `dia_${i}`;
+                const dayTopics = cronograma[i].conteudos.length;
+                
+                if (completedTopics[dayKey] && completedTopics[dayKey].length === dayTopics) {
+                    completedDays++;
+                }
+            }
+            
+            // Calcular porcentagem de progresso
+            const progressPercent = Math.round((completedDays / cronograma.length) * 100);
+            
+            // Atualizar elementos DOM
+            progressBar.style.width = `${progressPercent}%`;
+            progressPercentage.textContent = `${progressPercent}%`;
+            completedDaysEl.textContent = completedDays;
+            remainingDaysEl.textContent = cronograma.length - completedDays;
+            totalDaysEl.textContent = cronograma.length;
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
