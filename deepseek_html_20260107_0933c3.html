@@ -1,0 +1,4360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow - ChatBot Central</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #25D366;
+      --primary-dark: #128C7E;
+      --secondary: #34B7F1;
+      --success: #4CAF50;
+      --warning: #FF9800;
+      --danger: #F44336;
+      --light: #FFFFFF;
+      --dark: #1F2C34;
+      --gray: #667781;
+      --light-gray: #F0F0F0;
+      --chat-bg: #E5DDD5;
+      --user-bubble: #DCF8C6;
+      --bot-bubble: #FFFFFF;
+      --border-radius: 18px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .dark-theme {
+      --primary: #00A884;
+      --primary-dark: #008069;
+      --secondary: #53BDEB;
+      --light: #111B21;
+      --dark: #E9EDEF;
+      --gray: #8696A0;
+      --light-gray: #202C33;
+      --chat-bg: #0B141A;
+      --user-bubble: #005C4B;
+      --bot-bubble: #202C33;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    body {
+      background-color: var(--light);
+      color: var(--dark);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+    
+    .chatbot-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      background-color: var(--chat-bg);
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .chatbot-header {
+      background-color: var(--light);
+      color: var(--dark);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      position: relative;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .bot-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-info h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .header-info p {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success);
+      display: inline-block;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .header-btn {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .header-btn:hover {
+      background-color: var(--light-gray);
+    }
+    
+    .chat-messages {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto;
+      flex: 1;
+      gap: 8px;
+      scroll-behavior: smooth;
+    }
+    
+    .message-container {
+      display: flex;
+      margin-bottom: 4px;
+      animation: messageAppear 0.3s ease-out;
+    }
+    
+    .bot-container {
+      justify-content: flex-start;
+    }
+    
+    .user-container {
+      justify-content: flex-end;
+    }
+    
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 8px;
+      flex-shrink: 0;
+      align-self: flex-end;
+      margin-bottom: 4px;
+    }
+    
+    .bot-avatar-small {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    .user-avatar-small {
+      background: var(--secondary);
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    .message-bubble {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      max-width: 80%;
+      margin-bottom: 2px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-shadow: var(--shadow);
+      line-height: 1.4;
+    }
+    
+    @keyframes messageAppear {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .bot-bubble {
+      background: var(--bot-bubble);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      color: var(--dark);
+    }
+    
+    .user-bubble {
+      background: var(--user-bubble);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      color: #111B21;
+    }
+    
+    .bubble-time {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 16px;
+      background-color: var(--bot-bubble);
+      border-radius: var(--border-radius);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+      width: fit-content;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--gray);
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+    
+    .typing-dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+    
+    @keyframes typingAnimation {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .chatbot-input {
+      display: flex;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--light);
+      border-top: 1px solid var(--light-gray);
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .chatbot-input input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 24px;
+      border: none;
+      background-color: var(--light-gray);
+      color: var(--dark);
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    .chatbot-input input:focus {
+      background-color: var(--light);
+      box-shadow: 0 0 0 1.5px var(--primary);
+    }
+    
+    .input-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .input-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .input-btn:hover {
+      background-color: var(--light-gray);
+    }
+    
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .send-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+    
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .message-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+    }
+    
+    .message-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--dark);
+    }
+    
+    .message-subtitle {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    
+    .message-text {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--dark);
+    }
+    
+    .message-divider {
+      height: 1px;
+      background-color: var(--light-gray);
+      margin: 8px 0;
+    }
+    
+    .message-section {
+      margin: 8px 0;
+    }
+    
+    .message-section-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .message-list {
+      list-style-type: none;
+      margin: 8px 0;
+      padding-left: 0;
+    }
+    
+    .message-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .message-list-item:last-child {
+      border-bottom: none;
+    }
+    
+    .message-list-icon {
+      width: 16px;
+      text-align: center;
+      color: var(--primary);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    
+    .message-list-content {
+      flex: 1;
+    }
+    
+    .message-list-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .message-list-description {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+    
+    .message-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 12px 0;
+    }
+    
+    .message-stat {
+      background-color: var(--light-gray);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .message-stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 3px 0;
+    }
+    
+    .message-stat-label {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+    
+    .message-progress {
+      margin: 10px 0;
+    }
+    
+    .message-progress-bar {
+      height: 6px;
+      background-color: var(--light-gray);
+      border-radius: 3px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+    
+    .message-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--primary));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    
+    .message-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+    
+    .message-alert {
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+    }
+    
+    .message-alert-warning {
+      background-color: rgba(255, 152, 0, 0.1);
+      border-left: 4px solid var(--warning);
+    }
+    
+    .message-alert-danger {
+      background-color: rgba(244, 67, 54, 0.1);
+      border-left: 4px solid var(--danger);
+    }
+    
+    .message-alert-success {
+      background-color: rgba(76, 175, 80, 0.1);
+      border-left: 4px solid var(--success);
+    }
+    
+    .message-alert-info {
+      background-color: rgba(52, 183, 241, 0.1);
+      border-left: 4px solid var(--secondary);
+    }
+    
+    .message-card {
+      background-color: var(--bot-bubble);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 10px 0;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+    
+    .message-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .message-card-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--dark);
+    }
+    
+    .message-card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .message-muted {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+    
+    .message-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    
+    .message-badge-warning {
+      background-color: var(--warning);
+    }
+    
+    .message-badge-danger {
+      background-color: var(--danger);
+    }
+    
+    .message-badge-success {
+      background-color: var(--success);
+    }
+    
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+      justify-content: center;
+    }
+    
+    .action-btn {
+      padding: 10px 16px;
+      background-color: var(--bot-bubble);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      transition: var(--transition);
+      color: var(--dark);
+      box-shadow: var(--shadow);
+      font-weight: 500;
+    }
+    
+    .action-btn:hover {
+      background-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .action-btn.primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .action-btn.secondary {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .action-btn.info {
+      background-color: var(--light-gray);
+      color: var(--dark);
+    }
+    
+    .action-btn.reset {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .chat-date {
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.8rem;
+      margin: 10px 0;
+      position: relative;
+    }
+    
+    .chat-date::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: var(--light-gray);
+      z-index: 1;
+    }
+    
+    .chat-date span {
+      background-color: var(--chat-bg);
+      padding: 0 10px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .message-reaction {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 2px;
+    }
+    
+    .reaction-icon {
+      font-size: 0.7rem;
+      color: var(--gray);
+    }
+    
+    @media (max-width: 768px) {
+      .chatbot-container {
+        height: 100vh;
+      }
+      .message-bubble {
+        max-width: 85%;
+      }
+      .message-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .typing-text {
+      overflow: hidden;
+      white-space: nowrap;
+      animation: typing 3.5s steps(40, end);
+    }
+    
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+      animation: modalFadeIn 0.3s;
+    }
+    
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background-color: var(--light);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: modalSlideIn 0.3s;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .modal-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--light-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h3 {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray);
+      transition: var(--transition);
+    }
+    
+    .close-modal:hover {
+      color: var(--dark);
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .tasks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .task-card {
+      background-color: var(--light-gray);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--light-gray);
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    
+    .task-card.disabled {
+      opacity: 0.6;
+    }
+    
+    .task-card.active {
+      opacity: 1;
+      border-color: var(--primary);
+      background-color: var(--light);
+    }
+    
+    .task-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .task-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    
+    .task-icon-large {
+      font-size: 1.5rem;
+    }
+    
+    .task-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .task-description {
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .task-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 0;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--light-gray);
+      background-color: var(--light);
+      color: var(--dark);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .modal-footer {
+      padding: 1.2rem 1.5rem;
+      border-top: 1px solid var(--light-gray);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+      background-color: var(--light-gray);
+      color: var(--dark);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--gray);
+      color: white;
+    }
+    
+    .activate-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: auto;
+      transition: var(--transition);
+    }
+    
+    .activate-btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .task-card.disabled .activate-btn {
+      display: block;
+    }
+    
+    .task-card.active .activate-btn {
+      display: none;
+    }
+    
+    .task-card.disabled .activate-btn {
+      pointer-events: all !important;
+    }
+    
+    .task-card.disabled input {
+      pointer-events: none;
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .task-card.active input {
+      pointer-events: all;
+      background-color: var(--light);
+    }
+    
+    .yesterday-modal .modal-header {
+      background-color: rgba(244, 67, 54, 0.1);
+      border-bottom: 4px solid var(--danger);
+    }
+    
+    .yesterday-modal .modal-header h3 {
+      color: var(--danger);
+    }
+    
+    .yesterday-modal .modal-footer .btn-primary {
+      background-color: var(--danger);
+    }
+    
+    .yesterday-modal .modal-footer .btn-primary:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatbot-container">
+    <div class="chatbot-header">
+      <div class="header-left">
+        <div class="bot-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="header-info">
+          <h1>StudyFlow Assistant</h1>
+          <p><span class="status-dot"></span> Online • Seu assistente de estudos</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="themeToggle">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="header-btn" id="infoBtn">
+          <i class="fas fa-info"></i>
+        </button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <!-- Mensagens serão adicionadas dinamicamente -->
+    </div>
+    <div class="chatbot-input">
+      <div class="input-actions">
+        <button class="input-btn" id="attachBtn">
+          <i class="fas fa-paperclip"></i>
+        </button>
+        <button class="input-btn" id="emojiBtn">
+          <i class="far fa-smile"></i>
+        </button>
+      </div>
+      <input type="text" id="messageInput" placeholder="Digite uma mensagem...">
+      <button class="send-btn" id="sendMessage">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Modal de Registro Dinâmico -->
+  <div class="modal" id="registerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Registrar Atividades</h3>
+        <button class="close-modal" id="closeRegisterModal">&times;</button>
+      </div>
+      <div class="modal-body" id="registerModalBody">
+        <!-- Conteúdo dinâmico será inserido aqui -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelRegister">Cancelar</button>
+        <button class="btn btn-primary" id="saveRegister">Salvar Atividades Selecionadas</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Registrar Atividades do Dia Anterior -->
+  <div class="modal yesterday-modal" id="yesterdayModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-history"></i> Registrar Atividades de Ontem</h3>
+        <button class="close-modal" id="closeYesterdayModal">&times;</button>
+      </div>
+      <div class="modal-body" id="yesterdayModalBody">
+        <!-- Conteúdo dinâmico será inserido aqui -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelYesterday">Cancelar</button>
+        <button class="btn btn-primary" id="saveYesterday">Salvar Atividades de Ontem</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal de Configuração de Matérias por Dia -->
+  <div class="modal" id="configModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-cog"></i> Configurar Matérias por Dia</h3>
+        <button class="close-modal" id="closeConfigModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="materiasPorDia">Quantidade de matérias por dia:</label>
+          <input type="number" id="materiasPorDia" min="1" max="5" value="1">
+        </div>
+        <div class="message-muted">
+          Esta configuração define quantas matérias serão mostradas no resumo diário.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelConfig">Cancelar</button>
+        <button class="btn btn-primary" id="saveConfig">Salvar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Programar Simulado -->
+  <div class="modal" id="simuladoModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-alt"></i> Programar Simulado</h3>
+        <button class="close-modal" id="closeSimuladoModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="simuladoInterval">Intervalo entre simulados:</label>
+          <select id="simuladoInterval">
+            <option value="0">Nenhum (não programar)</option>
+            <option value="7">7 dias</option>
+            <option value="10">10 dias</option>
+            <option value="15">15 dias</option>
+            <option value="30">30 dias</option>
+          </select>
+        </div>
+        <div class="message-muted">
+          Quando chegar o dia do simulado, o chatbot irá alertar.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelSimulado">Cancelar</button>
+        <button class="btn btn-primary" id="saveSimulado">Salvar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Relatório Periódico -->
+  <div class="modal" id="relatorioModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-chart-bar"></i> Relatório Periódico</h3>
+        <button class="close-modal" id="closeRelatorioModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="relatorioPeriodo">Período do relatório:</label>
+          <select id="relatorioPeriodo">
+            <option value="7">7 dias</option>
+            <option value="15">15 dias</option>
+            <option value="30">30 dias</option>
+          </select>
+        </div>
+        <div class="message-muted">
+          O relatório somará todos os dados do período selecionado e comparará com o período anterior.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelRelatorio">Cancelar</button>
+        <button class="btn btn-primary" id="generateRelatorio">Gerar Relatório</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // CORREÇÃO DEFINITIVA DA INTEGRAÇÃO COM O CICLO DE ESTUDOS
+    // FONTE ÚNICA DE VERDADE: localStorage key "StudyFlow_activeCycle"
+    // GARANTINDO: Ordem imutável, índices originais, persistência real
+
+    class StudyFlowChatBot {
+      constructor() {
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        if (this.chatHistory.length > 3) {
+          this.chatHistory = this.chatHistory.slice(-3);
+        }
+        this.messageIds = new Set();
+        
+        this.materiasPorDia = parseInt(localStorage.getItem('studyFlow_materiasPorDia')) || 1;
+        this.today = new Date().toISOString().split('T')[0];
+        
+        this.yesterdayMemory = JSON.parse(localStorage.getItem('studyFlow_yesterdayMemory')) || {
+          activities: {},
+          date: null
+        };
+        
+        this.init();
+      }
+      
+      formatTime(date) {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+      
+      init() {
+        this.initTheme();
+        this.initChat();
+        this.initEventListeners();
+        this.showWelcomeMessage();
+        this.updateYesterdayMemory();
+      }
+      
+      initTheme() {
+        if (this.currentTheme === 'dark') {
+          document.body.classList.add('dark-theme');
+          document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+        }
+      }
+      
+      initChat() {
+        if (this.chatHistory.length > 0) {
+          this.chatHistory.forEach(msg => {
+            this.addMessageToChat(msg.content, msg.isUser, msg.timestamp);
+          });
+        }
+      }
+      
+      initEventListeners() {
+        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+        document.getElementById('infoBtn').addEventListener('click', () => this.showInfo());
+        document.getElementById('sendMessage').addEventListener('click', () => this.sendMessage());
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.sendMessage();
+        });
+        
+        document.getElementById('attachBtn').addEventListener('click', () => this.showQuickActions());
+        document.getElementById('emojiBtn').addEventListener('click', () => this.toggleEmojiPicker());
+        
+        document.getElementById('closeRegisterModal').addEventListener('click', () => this.closeRegisterModal());
+        document.getElementById('cancelRegister').addEventListener('click', () => this.closeRegisterModal());
+        document.getElementById('saveRegister').addEventListener('click', () => this.saveSelectedTasks());
+        
+        document.getElementById('closeYesterdayModal').addEventListener('click', () => this.closeYesterdayModal());
+        document.getElementById('cancelYesterday').addEventListener('click', () => this.closeYesterdayModal());
+        document.getElementById('saveYesterday').addEventListener('click', () => this.saveYesterdayTasks());
+        
+        document.getElementById('closeConfigModal').addEventListener('click', () => this.closeConfigModal());
+        document.getElementById('cancelConfig').addEventListener('click', () => this.closeConfigModal());
+        document.getElementById('saveConfig').addEventListener('click', () => this.saveConfig());
+        
+        document.getElementById('closeSimuladoModal').addEventListener('click', () => this.closeSimuladoModal());
+        document.getElementById('cancelSimulado').addEventListener('click', () => this.closeSimuladoModal());
+        document.getElementById('saveSimulado').addEventListener('click', () => this.saveSimuladoConfig());
+        
+        document.getElementById('closeRelatorioModal').addEventListener('click', () => this.closeRelatorioModal());
+        document.getElementById('cancelRelatorio').addEventListener('click', () => this.closeRelatorioModal());
+        document.getElementById('generateRelatorio').addEventListener('click', () => this.generateRelatorio());
+        
+        window.addEventListener('click', (e) => {
+          const modals = ['registerModal', 'yesterdayModal', 'configModal', 'simuladoModal', 'relatorioModal'];
+          modals.forEach(modalId => {
+            if (e.target === document.getElementById(modalId)) {
+              this[`close${modalId.charAt(0).toUpperCase() + modalId.slice(1)}`]();
+            }
+          });
+        });
+      }
+      
+      showWelcomeMessage() {
+        if (this.chatHistory.length === 0) {
+          this.addDateDivider();
+          this.typeMessage("Olá! Sou seu assistente de estudos do StudyFlow. 👋", () => {
+            setTimeout(() => {
+              this.typeMessage("Posso te ajudar a gerenciar seu ciclo de estudos, mostrar tarefas diárias, registrar progresso e muito mais!", () => {
+                setTimeout(() => {
+                  this.addQuickActions();
+                }, 500);
+              });
+            }, 500);
+          });
+        }
+      }
+      
+      addQuickActions() {
+        const quickActionsHTML = `
+          <div class="quick-actions">
+            <button class="action-btn primary" onclick="chatBot.showDailySummary()">
+              <i class="fas fa-calendar-day"></i> Resumo do Dia
+            </button>
+            <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
+              <i class="fas fa-plus-circle"></i> Registrar Atividade
+            </button>
+            <button class="action-btn info" onclick="chatBot.openYesterdayModal()">
+              <i class="fas fa-history"></i> Registrar Atividades de Ontem
+            </button>
+            <button class="action-btn info" onclick="chatBot.showEditalMenu()">
+              <i class="fas fa-file-alt"></i> Edital
+            </button>
+            <button class="action-btn info" onclick="chatBot.showSimuladosMenu()">
+              <i class="fas fa-chart-line"></i> Simulados
+            </button>
+            <button class="action-btn info" onclick="chatBot.showSimuladoModal()">
+              <i class="fas fa-calendar-alt"></i> Programar Simulado
+            </button>
+            <button class="action-btn info" onclick="chatBot.showRelatorioModal()">
+              <i class="fas fa-chart-bar"></i> Relatório
+            </button>
+            <button class="action-btn info" onclick="chatBot.trocarBaralhos()">
+              <i class="fas fa-sync-alt"></i> Trocar Baralhos
+            </button>
+            <button class="action-btn info" onclick="chatBot.showConfigModal()">
+              <i class="fas fa-cog"></i> Configurar
+            </button>
+            <button class="action-btn info" onclick="chatBot.showHelp()">
+              <i class="fas fa-question-circle"></i> Ajuda
+            </button>
+            <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
+              <i class="fas fa-exclamation-triangle"></i> Reset
+            </button>
+          </div>
+        `;
+        this.addBotMessage(quickActionsHTML, false);
+      }
+      
+      // ==================== CICLO DE ESTUDOS - CORREÇÃO DEFINITIVA ====================
+      
+      // FONTE ÚNICA: Obter ciclo ativo do localStorage
+      getActiveCycle() {
+        // Buscar diretamente da chave usada pelo site do Ciclo de Estudos
+        const activeCycle = this.getModuleData('StudyFlow_activeCycle');
+        
+        if (activeCycle && activeCycle.generatedCycle && Array.isArray(activeCycle.generatedCycle)) {
+          // Garantir que a estrutura básica exista
+          if (activeCycle.currentDay === undefined) {
+            activeCycle.currentDay = 0;
+          }
+          if (!activeCycle.completedSubjects) {
+            activeCycle.completedSubjects = {};
+          }
+          if (!activeCycle.lastAdvanced) {
+            activeCycle.lastAdvanced = this.today;
+          }
+          
+          return activeCycle;
+        }
+        
+        return null;
+      }
+      
+      // Obter matérias do dia atual - CORREÇÃO CRÍTICA: Usar ordem original, índices originais
+      getTodaySubjects(date = null) {
+        const activeCycle = this.getActiveCycle();
+        if (!activeCycle || !activeCycle.generatedCycle) return [];
+        
+        const cycleLength = activeCycle.generatedCycle.length;
+        if (cycleLength === 0) return [];
+        
+        const todayIndex = activeCycle.currentDay || 0;
+        const adjustedIndex = todayIndex % cycleLength;
+        
+        // Obter a matéria/dia conforme definido no ciclo ORIGINAL
+        let daySubject = activeCycle.generatedCycle[adjustedIndex];
+        
+        // Se for um array (múltiplas matérias no mesmo dia), retornar todas
+        if (Array.isArray(daySubject)) {
+          return daySubject;
+        }
+        
+        // Se for string única, retornar como array de um elemento
+        return [daySubject];
+      }
+      
+      // Atualizar ciclo de estudos - CORREÇÃO CRÍTICA: Persistência real no localStorage
+      updateStudyCycle(materiaId, tempo, specificDate = null) {
+        const activeCycle = this.getActiveCycle();
+        if (!activeCycle || !activeCycle.generatedCycle) return false;
+        
+        const today = specificDate ? new Date(specificDate) : new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        const todayIndex = activeCycle.currentDay || 0;
+        const cycleLength = activeCycle.generatedCycle.length;
+        const adjustedIndex = todayIndex % cycleLength;
+        
+        // Verificar se a matéria está no dia atual do ciclo ORIGINAL
+        const daySubjects = this.getTodaySubjects();
+        if (!daySubjects.includes(materiaId)) {
+          console.warn(`Matéria "${materiaId}" não encontrada no dia atual do ciclo.`);
+          return false;
+        }
+        
+        // Marcar como estudada
+        if (!activeCycle.completedSubjects) {
+          activeCycle.completedSubjects = {};
+        }
+        
+        // Criar chave única para o dia
+        const dayKey = `${adjustedIndex}_${todayStr}`;
+        if (!activeCycle.completedSubjects[dayKey]) {
+          activeCycle.completedSubjects[dayKey] = [];
+        }
+        
+        // Adicionar matéria à lista de concluídas (evitar duplicatas)
+        if (!activeCycle.completedSubjects[dayKey].includes(materiaId)) {
+          activeCycle.completedSubjects[dayKey].push(materiaId);
+        }
+        
+        // Registrar tempo de estudo
+        if (!activeCycle.studyTime) {
+          activeCycle.studyTime = {};
+        }
+        activeCycle.studyTime[todayStr] = (activeCycle.studyTime[todayStr] || 0) + parseInt(tempo);
+        
+        // AVANÇAR O CICLO APENAS SE FOR O DIA ATUAL E SE TODAS AS MATÉRIAS DO DIA FOREM CONCLUÍDAS
+        if (!specificDate && activeCycle.lastAdvanced !== todayStr) {
+          // Verificar se todas as matérias do dia foram concluídas
+          const allSubjectsCompleted = daySubjects.every(subject => 
+            activeCycle.completedSubjects[dayKey] && 
+            activeCycle.completedSubjects[dayKey].includes(subject)
+          );
+          
+          if (allSubjectsCompleted) {
+            // Avançar para o próximo dia
+            activeCycle.currentDay = (todayIndex + 1) % cycleLength;
+            activeCycle.lastAdvanced = todayStr;
+          }
+        }
+        
+        // SALVAR NO LOCALSTORAGE - PERSISTÊNCIA REAL
+        this.setModuleData('StudyFlow_activeCycle', activeCycle);
+        
+        return true;
+      }
+      
+      // ==================== FUNÇÕES CORRIGIDAS PARA USAR O CICLO REAL ====================
+      
+      updateYesterdayMemory() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        const yesterdayActivities = JSON.parse(localStorage.getItem(`dailyActivities_${yesterdayStr}`)) || { activities: {} };
+        
+        if (!yesterdayActivities.activities || Object.keys(yesterdayActivities.activities).length === 0) {
+          if (!this.yesterdayMemory.date || this.yesterdayMemory.date !== yesterdayStr) {
+            const yesterdayTasks = this.getTodayTasks(yesterdayStr);
+            this.yesterdayMemory = {
+              activities: yesterdayTasks,
+              date: yesterdayStr
+            };
+            localStorage.setItem('studyFlow_yesterdayMemory', JSON.stringify(this.yesterdayMemory));
+          }
+        } else {
+          this.yesterdayMemory = { activities: {}, date: null };
+          localStorage.setItem('studyFlow_yesterdayMemory', JSON.stringify(this.yesterdayMemory));
+        }
+      }
+      
+      openYesterdayModal() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        const yesterdayActivities = JSON.parse(localStorage.getItem(`dailyActivities_${yesterdayStr}`)) || { activities: {} };
+        if (yesterdayActivities.activities && Object.keys(yesterdayActivities.activities).length > 0) {
+          this.typeMessage("Você já registrou atividades para ontem! 😊");
+          return;
+        }
+        
+        if (!this.yesterdayMemory.activities || 
+            (this.yesterdayMemory.activities.questoes.length === 0 && 
+             this.yesterdayMemory.activities.anki.length === 0 && 
+             this.yesterdayMemory.activities.teoria.length === 0)) {
+          this.typeMessage("Não há atividades pendentes para ontem. 😊");
+          return;
+        }
+        
+        document.getElementById('yesterdayModal').style.display = 'flex';
+        this.loadYesterdayTasks();
+      }
+      
+      loadYesterdayTasks() {
+        const modalBody = document.getElementById('yesterdayModalBody');
+        modalBody.innerHTML = '';
+        
+        if (!this.yesterdayMemory.activities || 
+            (this.yesterdayMemory.activities.questoes.length === 0 && 
+             this.yesterdayMemory.activities.anki.length === 0 && 
+             this.yesterdayMemory.activities.teoria.length === 0)) {
+          modalBody.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-check-circle"></i>
+              <h3>Não há tarefas pendentes para ontem!</h3>
+              <p>Não foram encontradas atividades não registradas de ontem.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        let tasksHTML = '<div class="tasks-grid">';
+        
+        this.yesterdayMemory.activities.questoes.forEach(questao => {
+          tasksHTML += this.createQuestaoCard(questao);
+        });
+        
+        this.yesterdayMemory.activities.anki.forEach(deck => {
+          tasksHTML += this.createAnkiCard(deck);
+        });
+        
+        this.yesterdayMemory.activities.teoria.forEach(materia => {
+          tasksHTML += this.createTeoriaCard(materia);
+        });
+        
+        tasksHTML += '</div>';
+        modalBody.innerHTML = tasksHTML;
+      }
+      
+      saveYesterdayTasks() {
+        const activeCards = document.querySelectorAll('#yesterdayModal .task-card.active');
+        let hasError = false;
+        let savedCount = 0;
+        let totalTime = 0;
+        let activities = { questoes: [], anki: [], teoria: [] };
+        
+        if (activeCards.length === 0) {
+          alert('Por favor, selecione pelo menos uma atividade para registrar.');
+          return;
+        }
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        activeCards.forEach(card => {
+          const type = card.getAttribute('data-type');
+          const id = card.getAttribute('data-id');
+          
+          if (type === 'questoes') {
+            const feitas = document.getElementById(`questoes-feitas-${id}`).value;
+            const erradas = document.getElementById(`questoes-erradas-${id}`).value;
+            const tempo = document.getElementById(`questoes-tempo-${id}`).value;
+            
+            if (!feitas || !tempo) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              this.saveQuestoes(id, feitas, erradas, tempo, yesterdayStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.questoes.push({
+                assunto: id,
+                feitas: parseInt(feitas),
+                erradas: parseInt(erradas),
+                tempo: parseInt(tempo)
+              });
+            }
+          } else if (type === 'anki') {
+            const tempo = document.getElementById(`anki-tempo-${id}`).value;
+            const cards = document.getElementById(`anki-cards-${id}`).value;
+            
+            if (!tempo || !cards) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              this.saveAnki(id, tempo, cards, yesterdayStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.anki.push({
+                deck: id,
+                tempo: parseInt(tempo),
+                cards: parseInt(cards)
+              });
+            }
+          } else if (type === 'teoria') {
+            const conteudo = document.getElementById(`teoria-conteudo-${id}`).value;
+            const pagina = document.getElementById(`teoria-pagina-${id}`).value;
+            const tempo = document.getElementById(`teoria-tempo-${id}`).value;
+            
+            if (!tempo) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              this.saveTeoria(id, conteudo, pagina, tempo, yesterdayStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.teoria.push({
+                materia: id,
+                conteudo: conteudo,
+                pagina: pagina,
+                tempo: parseInt(tempo)
+              });
+            }
+          }
+        });
+        
+        if (hasError) {
+          alert('Preencha todos os campos obrigatórios das atividades selecionadas!');
+          return;
+        }
+        
+        const dailyActivities = {
+          date: yesterdayStr,
+          activities: activities
+        };
+        localStorage.setItem(`dailyActivities_${yesterdayStr}`, JSON.stringify(dailyActivities));
+        
+        this.yesterdayMemory = { activities: {}, date: null };
+        localStorage.setItem('studyFlow_yesterdayMemory', JSON.stringify(this.yesterdayMemory));
+        
+        this.closeYesterdayModal();
+        
+        if (savedCount > 0) {
+          this.showRegistrationSummary(savedCount, totalTime, activities, true);
+        }
+      }
+      
+      closeYesterdayModal() {
+        document.getElementById('yesterdayModal').style.display = 'none';
+      }
+      
+      getTodayTasks(dateStr = null) {
+        const date = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+        const dateKey = dateStr || this.getDynamicDateString();
+        
+        const tasks = { questoes: [], anki: [], teoria: [] };
+        
+        tasks.questoes = this.calculateTodayReviews(date);
+        tasks.anki = this.getTodayDecks().map(deckName => ({
+          id: deckName,
+          nome: deckName,
+          emoji: '🔁'
+        }));
+        
+        const activeCycle = this.getActiveCycle();
+        if (activeCycle && activeCycle.generatedCycle) {
+          tasks.teoria = this.getTodaySubjects(date);
+        }
+        
+        return tasks;
+      }
+      
+      showDailySummary() {
+        const hoje = this.getDynamicDateObject();
+        const hojeStr = this.getDynamicDateString();
+        
+        this.checkSimuladoDay();
+        this.updateAnkiProgress();
+        
+        if (this.hasStudiedToday()) {
+          this.showTodaySummary(hojeStr);
+        } else {
+          this.showPendingTasks(hojeStr);
+        }
+        
+        this.addYesterdayButtonIfNeeded();
+      }
+      
+      addYesterdayButtonIfNeeded() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        const yesterdayActivities = JSON.parse(localStorage.getItem(`dailyActivities_${yesterdayStr}`)) || { activities: {} };
+        
+        if (!yesterdayActivities.activities || Object.keys(yesterdayActivities.activities).length === 0) {
+          if (this.yesterdayMemory.activities && 
+              (this.yesterdayMemory.activities.questoes.length > 0 || 
+               this.yesterdayMemory.activities.anki.length > 0 || 
+               this.yesterdayMemory.activities.teoria.length > 0)) {
+            
+            setTimeout(() => {
+              this.addBotMessage(`
+                <div class="message-alert message-alert-warning">
+                  <i class="fas fa-history"></i>
+                  <div><strong>Você tem atividades não registradas de ontem!</strong></div>
+                </div>
+                <div class="quick-actions">
+                  <button class="action-btn info" onclick="chatBot.openYesterdayModal()">
+                    <i class="fas fa-history"></i> Registrar Atividades de Ontem
+                  </button>
+                </div>
+              `, false);
+            }, 1000);
+          }
+        }
+      }
+      
+      // ==================== FUNÇÕES DE SALVAMENTO CORRIGIDAS ====================
+      
+      saveQuestoes(assuntoId, feitas, erradas, tempo, specificDate = null) {
+        const corretas = parseInt(feitas) - parseInt(erradas);
+        const dificuldade = 2;
+        
+        const revisaoAtualizada = this.updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade, specificDate);
+        
+        if (revisaoAtualizada) {
+          let dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+          dailyCompletedReviews += 1;
+          this.setModuleData('dailyCompletedReviews', dailyCompletedReviews);
+          
+          const hoje = specificDate ? new Date(specificDate + 'T00:00:00') : new Date();
+          this.setModuleData('lastReviewDate', hoje.toISOString().split('T')[0]);
+          
+          this.registerHomeSession(`Questões - ${assuntoId}`, parseInt(tempo), specificDate);
+          localStorage.setItem('ultimoEstudo', new Date().toISOString());
+        }
+      }
+      
+      saveTeoria(materiaId, conteudo, pagina, tempo, specificDate = null) {
+        // CORREÇÃO CRÍTICA: Usar a função updateStudyCycle corrigida
+        const cicloAtualizado = this.updateStudyCycle(materiaId, tempo, specificDate);
+        
+        if (cicloAtualizado) {
+          this.registerHomeSession(`Teoria - ${materiaId}`, parseInt(tempo), specificDate);
+          
+          const teoriaProgress = this.getModuleData('teoriaProgress') || {};
+          teoriaProgress[materiaId] = {
+            conteudo: conteudo,
+            pagina: pagina,
+            ultimaAtualizacao: new Date().toISOString()
+          };
+          this.setModuleData('teoriaProgress', teoriaProgress);
+          
+          localStorage.setItem('ultimoEstudo', new Date().toISOString());
+        }
+      }
+      
+      saveAnki(deckId, tempo, cards, specificDate = null) {
+        const ankiData = this.getModuleData('ciclos_focus_v1');
+        const deck = ankiData && ankiData.decks ? ankiData.decks.find(d => d.id === deckId) : null;
+        const deckNome = deck ? deck.name : deckId;
+        
+        this.registerHomeSession(`Anki - ${deckNome}`, parseInt(tempo), specificDate);
+        localStorage.setItem('ultimoEstudo', new Date().toISOString());
+      }
+      
+      registerHomeSession(subject, minutes, specificDate = null) {
+        const date = specificDate ? new Date(specificDate + 'T00:00:00') : new Date();
+        const dateKey = `sessions-${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
+        
+        let sessions = this.getModuleData(dateKey) || [];
+        sessions.push({
+          subject: subject,
+          minutes: minutes,
+          date: `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`,
+          timestamp: date.toISOString()
+        });
+        
+        this.setModuleData(dateKey, sessions);
+      }
+      
+      updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade, specificDate = null) {
+        const disciplines = this.getModuleData('disciplines') || [];
+        const reviewDate = specificDate ? new Date(specificDate + 'T00:00:00') : new Date();
+        const reviewTimestamp = reviewDate.getTime();
+        
+        let assuntoEncontrado = null;
+        let disciplinaEncontrada = null;
+        
+        for (const disciplina of disciplines) {
+          if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+            for (const assunto of disciplina.assuntos) {
+              if (assunto.nome === assuntoId) {
+                assuntoEncontrado = assunto;
+                disciplinaEncontrada = disciplina;
+                break;
+              }
+            }
+            if (assuntoEncontrado) break;
+          }
+        }
+        
+        if (assuntoEncontrado) {
+          assuntoEncontrado.questions = (assuntoEncontrado.questions || 0) + parseInt(feitas);
+          assuntoEncontrado.correct = (assuntoEncontrado.correct || 0) + parseInt(corretas);
+          assuntoEncontrado.incorrect = (assuntoEncontrado.incorrect || 0) + (parseInt(feitas) - parseInt(corretas));
+          
+          if (!assuntoEncontrado.difficultyHistory) {
+            assuntoEncontrado.difficultyHistory = [];
+          }
+          assuntoEncontrado.difficultyHistory.push(parseInt(dificuldade));
+          
+          const accuracy = (parseInt(corretas) / parseInt(feitas)) * 100;
+          
+          if (assuntoEncontrado.reviewMethod === 'fixed') {
+            const interval = this.getPerformanceBasedInterval(accuracy);
+            assuntoEncontrado.interval = interval;
+            assuntoEncontrado.repetitions = (assuntoEncontrado.repetitions || 0) + 1;
+          } else {
+            const result = this.calculateNextReviewSM2(
+              parseInt(dificuldade),
+              assuntoEncontrado.easeFactor || 2.5,
+              assuntoEncontrado.interval || 1,
+              assuntoEncontrado.repetitions || 0
+            );
+            assuntoEncontrado.easeFactor = result.newEF;
+            assuntoEncontrado.interval = result.newInterval;
+            assuntoEncontrado.repetitions = result.repetitions;
+          }
+          
+          assuntoEncontrado.lastReviewed = reviewTimestamp;
+          
+          const nextReviewDate = new Date(reviewTimestamp);
+          nextReviewDate.setDate(nextReviewDate.getDate() + assuntoEncontrado.interval);
+          assuntoEncontrado.nextReviewDate = nextReviewDate.getTime();
+          
+          assuntoEncontrado.memoryStrength = this.calculateMemoryStrength(assuntoEncontrado);
+          
+          this.setModuleData('disciplines', disciplines);
+          return true;
+        } else {
+          return false;
+        }
+      }
+      
+      showResetConfirmation() { 
+        const confirmationHTML = ` 
+          <div class="message-card"> 
+            <div class="message-card-header"> 
+              <i class="fas fa-exclamation-triangle" style="color: var(--danger)"></i> 
+              <div class="message-card-title">Reset Temporário</div> 
+            </div> 
+            <div class="message-card-content"> 
+              <div class="message-alert message-alert-danger"> 
+                <i class="fas fa-exclamation-circle"></i> 
+                <div><strong>Atenção!</strong> Esta função executa um reset temporário do módulo do Chatbot, útil para corrigir travamentos ou inconsistências nos dados do dia. Nenhum outro módulo será afetado. Deseja continuar?</div> 
+              </div> 
+              <div class="quick-actions"> 
+                <button class="action-btn reset" onclick="chatBot.resetChatbotData()"> 
+                  <i class="fas fa-sync-alt"></i> Confirmar Reset 
+                </button> 
+                <button class="action-btn info" onclick="chatBot.addBotMessage('Reset cancelado. O sistema permanece inalterado.', false)"> 
+                  <i class="fas fa-times"></i> Cancelar 
+                </button> 
+              </div> 
+            </div> 
+          </div> 
+        `; 
+        this.addBotMessage(confirmationHTML, false); 
+      } 
+      
+      resetChatbotData() { 
+        const hoje = new Date(); 
+        const hojeStr = hoje.toLocaleDateString('pt-BR'); 
+        
+        localStorage.removeItem('lastRegisterDate'); 
+        localStorage.removeItem('dailyActivities'); 
+        
+        const successHTML = ` 
+          <div class="message-card"> 
+            <div class="message-card-header"> 
+              <i class="fas fa-check-circle" style="color: var(--success)"></i> 
+              <div class="message-card-title">Reset Concluído</div> 
+            </div> 
+            <div class="message-card-content"> 
+              <div class="message-alert message-alert-success"> 
+                <i class="fas fa-check-circle"></i> 
+                <div><strong>Reset realizado com sucesso!</strong> Dados do módulo Chatbot reiniciados em ${hojeStr}.</div> 
+              </div> 
+              <div class="message-text"> 
+                Agora você pode visualizar e registrar as atividades reais do dia. O sistema voltará a funcionar normalmente a partir de amanhã. 
+              </div> 
+              <div class="quick-actions"> 
+                <button class="action-btn primary" onclick="chatBot.showDailySummary()"> 
+                  <i class="fas fa-calendar-day"></i> Ver Resumo do Dia 
+                </button> 
+                <button class="action-btn secondary" onclick="chatBot.openRegisterModal()"> 
+                  <i class="fas fa-plus-circle"></i> Registrar Atividades 
+                </button> 
+              </div> 
+            </div> 
+          </div> 
+        `; 
+        this.addBotMessage(successHTML, false); 
+      } 
+      
+      getDynamicDateString() { 
+        const hoje = new Date(); 
+        const year = hoje.getFullYear(); 
+        const month = String(hoje.getMonth() + 1).padStart(2, '0'); 
+        const day = String(hoje.getDate()).padStart(2, '0'); 
+        return `${year}-${month}-${day}`; 
+      } 
+      
+      getDynamicDateObject() { 
+        return new Date(); 
+      } 
+      
+      formatDynamicDate(date) { 
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; 
+        return date.toLocaleDateString('pt-BR', options); 
+      } 
+      
+      isToday(dateString) { 
+        const hoje = this.getDynamicDateString(); 
+        return dateString === hoje; 
+      } 
+      
+      hasRegisteredToday() { 
+        const lastRegisterDate = localStorage.getItem('lastRegisterDate'); 
+        return lastRegisterDate && this.isToday(lastRegisterDate); 
+      } 
+      
+      hasStudiedToday() { 
+        const dailyActivities = JSON.parse(localStorage.getItem('dailyActivities')) || {}; 
+        return dailyActivities.date === this.today; 
+      } 
+      
+      showDailySummary() { 
+        const hoje = this.getDynamicDateObject();
+        const hojeStr = this.getDynamicDateString();
+        
+        this.checkSimuladoDay();
+        this.updateAnkiProgress();
+        
+        if (this.hasStudiedToday()) {
+          this.showTodaySummary(hojeStr);
+        } else {
+          this.showPendingTasks(hojeStr);
+        }
+      }
+      
+      checkSimuladoDay() {
+        const simuladoConfig = JSON.parse(localStorage.getItem('studyFlow_simuladoConfig')) || {};
+        
+        if (simuladoConfig.interval && simuladoConfig.nextSimulado) {
+          const hoje = new Date();
+          const nextSimulado = new Date(simuladoConfig.nextSimulado);
+          
+          if (hoje.toDateString() === nextSimulado.toDateString()) {
+            this.addBotMessage(`
+              <div class="message-alert message-alert-warning">
+                <i class="fas fa-bullhorn"></i>
+                <div><strong>Hoje é dia de simulado!</strong> Faça o simulado como se fosse o dia da prova real.</div>
+              </div>
+            `, false);
+          }
+        }
+      }
+      
+      updateAnkiProgress() {
+        const ankiData = this.getModuleData('ciclos_focus_v1');
+        if (!ankiData) return;
+        
+        const today = new Date().toDateString();
+        if (ankiData.lastUpdated !== today) {
+          const totalDecks = ankiData.decks.length;
+          const perDay = ankiData.perDay;
+          const totalBlocks = Math.ceil(totalDecks / perDay);
+          
+          const startDate = new Date(ankiData.startDate || new Date());
+          const diffTime = new Date() - startDate;
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          ankiData.blockIndex = diffDays % totalBlocks;
+          ankiData.lastUpdated = today;
+          this.setModuleData('ciclos_focus_v1', ankiData);
+        }
+      }
+      
+      showPendingTasks(hojeStr) {
+        const hoje = new Date(hojeStr + 'T00:00:00');
+        const dataFormatada = this.formatDynamicDate(hoje);
+        
+        const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+        const dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+        const revisoesHoje = this.calculateTodayReviews();
+        const progressoMeta = Math.min((dailyCompletedReviews / dailyReviewGoal) * 100, 100);
+        const alertas = this.checkAlerts();
+        const materiasCiclo = this.getTodaySubjects();
+        const baralhosAnki = this.getTodayDecks();
+        
+        let summaryHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-calendar-day"></i>
+              <div class="message-card-title">Resumo do Dia - ${dataFormatada}</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-text">
+                <strong>Olá! Aqui estão suas tarefas para hoje:</strong>
+              </div>
+        `;
+        
+        if (revisoesHoje.length > 0) {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Revisões Pendentes</div>
+              <div class="message-list">
+          `;
+          revisoesHoje.forEach(revisao => {
+            summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-book"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${revisao.nome}</div>
+                    <div class="message-list-description">${revisao.disciplina}</div>
+                  </div>
+                </div>
+            `;
+          });
+          summaryHTML += `
+              </div>
+            </div>
+          `;
+        } else {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Revisões Pendentes</div>
+              <div class="message-alert message-alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>Nenhuma revisão pendente para hoje</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        summaryHTML += `
+          <div class="message-section">
+            <div class="message-section-title">Matérias de Hoje</div>
+        `;
+        
+        if (materiasCiclo.length > 0) {
+          summaryHTML += `<div class="message-list">`;
+          materiasCiclo.forEach(materia => {
+            const teoriaProgress = this.getModuleData('teoriaProgress');
+            const ultimoEstudo = teoriaProgress && teoriaProgress[materia];
+            
+            summaryHTML += `
+              <div class="message-list-item">
+                <div class="message-list-icon"><i class="fas fa-book"></i></div>
+                <div class="message-list-content">
+                  <div class="message-list-title">${materia}</div>
+                  ${ultimoEstudo ? `
+                    <div class="message-list-description">
+                      Último estudo: ${ultimoEstudo.conteudo} ${ultimoEstudo.pagina ? `(${ultimoEstudo.pagina})` : ''}
+                    </div>` : `
+                    <div class="message-list-description">Nenhum registro anterior</div>`}
+                </div>
+              </div>
+            `;
+          });
+          summaryHTML += `</div>`;
+        } else {
+          summaryHTML += `
+            <div class="message-alert message-alert-warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>Nenhuma matéria encontrada no ciclo de estudos ativo</div>
+            </div>
+          `;
+        }
+        
+        summaryHTML += `</div>`;
+        
+        summaryHTML += `
+          <div class="message-section">
+            <div class="message-section-title">Baralhos Anki</div>
+            <div class="message-list">
+        `;
+        
+        if (baralhosAnki.length > 0) {
+          baralhosAnki.forEach(deck => {
+            summaryHTML += `
+              <div class="message-list-item">
+                <div class="message-list-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="message-list-content">
+                  <div class="message-list-title">${deck}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          summaryHTML += `
+            <div class="message-alert message-alert-info">
+              <i class="fas fa-info-circle"></i>
+              <div>Nenhum baralho programado para hoje</div>
+            </div>
+          `;
+        }
+        
+        summaryHTML += `
+            </div>
+          </div>
+        `;
+        
+        if (alertas.length > 0) {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Alertas</div>
+          `;
+          alertas.forEach(alerta => {
+            const alertClass = `message-alert-${alerta.tipo === 'alert-danger' ? 'danger' : alerta.tipo === 'alert-warning' ? 'warning' : 'info'}`;
+            summaryHTML += `
+              <div class="message-alert ${alertClass}">
+                <i class="fas fa-${alerta.icone}"></i>
+                <div>${alerta.mensagem}</div>
+              </div>
+            `;
+          });
+          summaryHTML += `</div>`;
+        }
+        
+        summaryHTML += `
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(summaryHTML, true, 'pending-summary');
+        
+        setTimeout(() => {
+          this.addBotMessage(`
+            <div class="quick-actions">
+              <button class="action-btn primary" onclick="chatBot.openRegisterModal()">
+                <i class="fas fa-plus-circle"></i> Registrar Atividades
+              </button>
+              <button class="action-btn info" onclick="chatBot.trocarBaralhos()">
+                <i class="fas fa-sync-alt"></i> Trocar Baralhos
+              </button>
+              <button class="action-btn info" onclick="chatBot.showHelp()">
+                <i class="fas fa-question-circle"></i> Preciso de Ajuda
+              </button>
+            </div>
+          `, false);
+        }, 500);
+      }
+      
+      showTodaySummary(hojeStr) {
+        const hoje = new Date(hojeStr + 'T00:00:00');
+        const dataFormatada = this.formatDynamicDate(hoje);
+        
+        const dailyActivities = JSON.parse(localStorage.getItem('dailyActivities')) || { activities: {} };
+        const atividades = dailyActivities.activities;
+        
+        let totalTime = 0;
+        let totalAnkiDecks = 0;
+        let totalQuestoes = 0;
+        let totalTeoria = 0;
+        
+        if (atividades.questoes && atividades.questoes.length > 0) {
+          atividades.questoes.forEach(q => {
+            totalTime += q.tempo;
+            totalQuestoes++;
+          });
+        }
+        
+        if (atividades.anki && atividades.anki.length > 0) {
+          atividades.anki.forEach(a => {
+            totalTime += a.tempo;
+            totalAnkiDecks++;
+          });
+        }
+        
+        if (atividades.teoria && atividades.teoria.length > 0) {
+          atividades.teoria.forEach(t => {
+            totalTime += t.tempo;
+            totalTeoria++;
+          });
+        }
+        
+        const hours = Math.floor(totalTime / 60);
+        const minutes = totalTime % 60;
+        
+        let summaryHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-calendar-day"></i>
+              <div class="message-card-title">Resumo do Dia - ${dataFormatada}</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-alert message-alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div><strong>Parabéns! Você já estudou hoje.</strong></div>
+              </div>
+        `;
+        
+        if (atividades.questoes && atividades.questoes.length > 0) {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Questões Realizadas</div>
+              <div class="message-list">
+          `;
+          atividades.questoes.forEach(q => {
+            const acertos = q.feitas - q.erradas;
+            const taxaAcerto = q.feitas > 0 ? Math.round((acertos / q.feitas) * 100) : 0;
+            
+            summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${q.assunto}</div>
+                    <div class="message-list-description">${q.feitas} questões • ${taxaAcerto}% de acerto • ${q.tempo} min</div>
+                  </div>
+                </div>
+            `;
+          });
+          summaryHTML += `
+              </div>
+            </div>
+          `;
+        }
+        
+        if (atividades.anki && atividades.anki.length > 0) {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Revisões Anki</div>
+              <div class="message-list">
+          `;
+          atividades.anki.forEach(a => {
+            summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${a.deck}</div>
+                    <div class="message-list-description">${a.cards} cards revisados • ${a.tempo} min</div>
+                  </div>
+                </div>
+            `;
+          });
+          summaryHTML += `
+              </div>
+            </div>
+          `;
+        }
+        
+        if (atividades.teoria && atividades.teoria.length > 0) {
+          summaryHTML += `
+            <div class="message-section">
+              <div class="message-section-title">Estudo Teórico</div>
+              <div class="message-list">
+          `;
+          atividades.teoria.forEach(t => {
+            summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${t.materia}</div>
+                    <div class="message-list-description">${t.conteudo || t.pagina || 'Estudo concluído'} • ${t.tempo} min</div>
+                  </div>
+                </div>
+            `;
+          });
+          summaryHTML += `
+              </div>
+            </div>
+          `;
+        }
+        
+        summaryHTML += `
+              <div class="message-divider"></div>
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${hours}h ${minutes}m</div>
+                  <div class="message-stat-label">Tempo Total</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${totalAnkiDecks}</div>
+                  <div class="message-stat-label">Baralhos Revisados</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${totalQuestoes}</div>
+                  <div class="message-stat-label">Blocos de Questões</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${totalTeoria}</div>
+                  <div class="message-stat-label">Estudos Teóricos</div>
+                </div>
+              </div>
+        `;
+        
+        const comparacaoHTML = this.generateComparacaoComOntem(hojeStr, atividades, totalTime);
+        summaryHTML += comparacaoHTML;
+        
+        summaryHTML += `
+              <div class="message-alert message-alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div><strong>Volte amanhã para novas atividades!</strong></div>
+              </div>
+        `;
+        
+        summaryHTML += `
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(summaryHTML, true, 'today-summary');
+        
+        setTimeout(() => {
+          this.addBotMessage(`
+            <div class="quick-actions">
+              <button class="action-btn info" onclick="chatBot.showHelp()">
+                <i class="fas fa-question-circle"></i> Preciso de Ajuda
+              </button>
+            </div>
+          `, false);
+        }, 500);
+      }
+      
+      generateComparacaoComOntem(hojeStr, atividades, totalTime) {
+        const ontem = new Date();
+        ontem.setDate(ontem.getDate() - 1);
+        const ontemStr = ontem.toISOString().split('T')[0];
+        const ontemActivities = JSON.parse(localStorage.getItem(`dailyActivities_${ontemStr}`)) || { activities: {} };
+        
+        if (!ontemActivities.activities || Object.keys(ontemActivities.activities).length === 0) {
+          return '';
+        }
+        
+        let ontemTotalTime = 0;
+        let ontemTotalQuestoes = 0;
+        let ontemTotalAcertos = 0;
+        let ontemTotalAnkiDecks = 0;
+        
+        if (ontemActivities.activities.questoes && ontemActivities.activities.questoes.length > 0) {
+          ontemActivities.activities.questoes.forEach(q => {
+            ontemTotalTime += q.tempo;
+            ontemTotalQuestoes += q.feitas;
+            ontemTotalAcertos += (q.feitas - q.erradas);
+          });
+        }
+        
+        if (ontemActivities.activities.anki && ontemActivities.activities.anki.length > 0) {
+          ontemTotalAnkiDecks += ontemActivities.activities.anki.length;
+          ontemActivities.activities.anki.forEach(a => {
+            ontemTotalTime += a.tempo;
+          });
+        }
+        
+        if (ontemActivities.activities.teoria && ontemActivities.activities.teoria.length > 0) {
+          ontemActivities.activities.teoria.forEach(t => {
+            ontemTotalTime += t.tempo;
+          });
+        }
+        
+        let hojeTotalQuestoes = 0;
+        let hojeTotalAcertos = 0;
+        
+        if (atividades.questoes && atividades.questoes.length > 0) {
+          atividades.questoes.forEach(q => {
+            hojeTotalQuestoes += q.feitas;
+            hojeTotalAcertos += (q.feitas - q.erradas);
+          });
+        }
+        
+        const diffTime = totalTime - ontemTotalTime;
+        const diffQuestoes = hojeTotalQuestoes - ontemTotalQuestoes;
+        const diffAnkiDecks = (atividades.anki ? atividades.anki.length : 0) - ontemTotalAnkiDecks;
+        const hojeAcertosPercent = hojeTotalQuestoes > 0 ? (hojeTotalAcertos / hojeTotalQuestoes) * 100 : 0;
+        const ontemAcertosPercent = ontemTotalQuestoes > 0 ? (ontemTotalAcertos / ontemTotalQuestoes) * 100 : 0;
+        const diffAcertosPercent = hojeAcertosPercent - ontemAcertosPercent;
+        
+        let comparacaoHTML = `
+          <div class="message-section">
+            <div class="message-section-title">Comparação com Ontem</div>
+            <div class="message-list">
+        `;
+        
+        let timeIcon = '⏱️';
+        let timeText = '';
+        if (diffTime > 0) {
+          timeText = `<span style="color: var(--success)">+${diffTime} min</span> em relação a ontem`;
+        } else if (diffTime < 0) {
+          timeText = `<span style="color: var(--danger)">${diffTime} min</span> em relação a ontem`;
+        } else {
+          timeText = `Mesmo tempo de estudo que ontem`;
+        }
+        comparacaoHTML += `
+          <div class="message-list-item">
+            <div class="message-list-icon">${timeIcon}</div>
+            <div class="message-list-content">
+              <div class="message-list-title">Horas estudadas</div>
+              <div class="message-list-description">${timeText}</div>
+            </div>
+          </div>
+        `;
+        
+        let questoesIcon = '🧩';
+        let questoesText = '';
+        if (diffQuestoes > 0) {
+          questoesText = `<span style="color: var(--success)">+${diffQuestoes} questões</span> em relação a ontem`;
+        } else if (diffQuestoes < 0) {
+          questoesText = `<span style="color: var(--danger)">${diffQuestoes} questões</span> em relação a ontem`;
+        } else {
+          questoesText = `Mesma quantidade de questões que ontem`;
+        }
+        comparacaoHTML += `
+          <div class="message-list-item">
+            <div class="message-list-icon">${questoesIcon}</div>
+            <div class="message-list-content">
+              <div class="message-list-title">Questões resolvidas</div>
+              <div class="message-list-description">${questoesText}</div>
+            </div>
+          </div>
+        `;
+        
+        let acertosIcon = '📊';
+        let acertosText = '';
+        if (diffAcertosPercent > 0) {
+          acertosText = `<span style="color: var(--success)">+${diffAcertosPercent.toFixed(1)}%</span> em relação a ontem`;
+        } else if (diffAcertosPercent < 0) {
+          acertosText = `<span style="color: var(--danger)">${diffAcertosPercent.toFixed(1)}%</span> em relação a ontem`;
+        } else {
+          acertosText = `Mesma porcentagem de acertos que ontem`;
+        }
+        comparacaoHTML += `
+          <div class="message-list-item">
+            <div class="message-list-icon">${acertosIcon}</div>
+            <div class="message-list-content">
+              <div class="message-list-title">Porcentagem de acertos</div>
+              <div class="message-list-description">${acertosText}</div>
+            </div>
+          </div>
+        `;
+        
+        let flashcardsIcon = '🔁';
+        let flashcardsText = '';
+        if (diffAnkiDecks > 0) {
+          flashcardsText = `<span style="color: var(--success)">+${diffAnkiDecks} baralhos</span> em relação a ontem`;
+        } else if (diffAnkiDecks < 0) {
+          flashcardsText = `<span style="color: var(--danger)">${diffAnkiDecks} baralhos</span> em relação a ontem`;
+        } else {
+          flashcardsText = `Mesma quantidade de baralhos que ontem`;
+        }
+        comparacaoHTML += `
+          <div class="message-list-item">
+            <div class="message-list-icon">${flashcardsIcon}</div>
+            <div class="message-list-content">
+              <div class="message-list-title">Flashcards revisados</div>
+              <div class="message-list-description">${flashcardsText}</div>
+            </div>
+          </div>
+        `;
+        
+        comparacaoHTML += `
+            </div>
+          </div>
+        `;
+        
+        return comparacaoHTML;
+      }
+      
+      openRegisterModal() {
+        const hojeStr = this.getDynamicDateString();
+        
+        if (this.hasStudiedToday()) {
+          this.typeMessage("Você já registrou suas atividades hoje! 😊\n\nSe quiser ver o resumo do que foi feito, peça o <strong>resumo do dia</strong>.");
+          return;
+        }
+        
+        document.getElementById('registerModal').style.display = 'flex';
+        this.loadTodayTasks();
+      }
+      
+      addDateDivider() {
+        const hoje = this.getDynamicDateObject();
+        const dataFormatada = this.formatDynamicDate(hoje);
+        
+        const chatMessages = document.getElementById('chatMessages');
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'chat-date';
+        dateDiv.innerHTML = `<span>${dataFormatada}</span>`;
+        chatMessages.appendChild(dateDiv);
+      }
+      
+      showConfigModal() {
+        document.getElementById('configModal').style.display = 'flex';
+        document.getElementById('materiasPorDia').value = this.materiasPorDia;
+      }
+      
+      closeConfigModal() {
+        document.getElementById('configModal').style.display = 'none';
+      }
+      
+      saveConfig() {
+        const materiasPorDia = parseInt(document.getElementById('materiasPorDia').value);
+        if (materiasPorDia >= 1 && materiasPorDia <= 5) {
+          this.materiasPorDia = materiasPorDia;
+          localStorage.setItem('studyFlow_materiasPorDia', materiasPorDia.toString());
+          this.closeConfigModal();
+          this.typeMessage(`Configuração salva! Agora você verá ${materiasPorDia} matéria(s) por dia.`);
+        } else {
+          alert('Por favor, informe um número entre 1 e 5.');
+        }
+      }
+      
+      showSimuladoModal() {
+        document.getElementById('simuladoModal').style.display = 'flex';
+        const simuladoConfig = JSON.parse(localStorage.getItem('studyFlow_simuladoConfig')) || {};
+        document.getElementById('simuladoInterval').value = simuladoConfig.interval || '0';
+      }
+      
+      closeSimuladoModal() {
+        document.getElementById('simuladoModal').style.display = 'none';
+      }
+      
+      saveSimuladoConfig() {
+        const interval = parseInt(document.getElementById('simuladoInterval').value);
+        const simuladoConfig = { interval: interval };
+        
+        if (interval > 0) {
+          const hoje = new Date();
+          const nextSimulado = new Date();
+          nextSimulado.setDate(hoje.getDate() + interval);
+          simuladoConfig.nextSimulado = nextSimulado.toISOString();
+        }
+        
+        localStorage.setItem('studyFlow_simuladoConfig', JSON.stringify(simuladoConfig));
+        this.closeSimuladoModal();
+        this.typeMessage('Configuração de simulado salva!');
+      }
+      
+      showRelatorioModal() {
+        document.getElementById('relatorioModal').style.display = 'flex';
+      }
+      
+      closeRelatorioModal() {
+        document.getElementById('relatorioModal').style.display = 'none';
+      }
+      
+      generateRelatorio() {
+        const periodo = parseInt(document.getElementById('relatorioPeriodo').value);
+        this.closeRelatorioModal();
+        
+        const hoje = new Date();
+        const periodData = this.getPeriodData(periodo);
+        const previousPeriodData = this.getPeriodData(periodo, periodo);
+        
+        const atualTotais = this.calculatePeriodTotals(periodData);
+        const anteriorTotais = this.calculatePeriodTotals(previousPeriodData);
+        
+        const relatorioHTML = this.generateRelatorioHTML(periodo, atualTotais, anteriorTotais);
+        this.addBotMessage(relatorioHTML, true, 'relatorio-periodico');
+      }
+      
+      getPeriodData(dias, offset = 0) {
+        const data = [];
+        const hoje = new Date();
+        
+        for (let i = offset + dias - 1; i >= offset; i--) {
+          const dataItem = new Date();
+          dataItem.setDate(hoje.getDate() - i);
+          const dataStr = dataItem.toISOString().split('T')[0];
+          const atividades = JSON.parse(localStorage.getItem(`dailyActivities_${dataStr}`)) || { activities: {} };
+          
+          if (Object.keys(atividades.activities).length > 0) {
+            data.push({
+              date: dataStr,
+              atividades: atividades.activities
+            });
+          }
+        }
+        
+        return data;
+      }
+      
+      calculatePeriodTotals(periodData) {
+        const totais = {
+          totalTime: 0,
+          totalQuestoes: 0,
+          totalAcertos: 0,
+          totalAnkiDecks: 0,
+          totalFlashcards: 0
+        };
+        
+        periodData.forEach(dia => {
+          if (dia.atividades.questoes && dia.atividades.questoes.length > 0) {
+            dia.atividades.questoes.forEach(q => {
+              totais.totalTime += q.tempo;
+              totais.totalQuestoes += q.feitas;
+              totais.totalAcertos += (q.feitas - q.erradas);
+            });
+          }
+          
+          if (dia.atividades.anki && dia.atividades.anki.length > 0) {
+            totais.totalAnkiDecks += dia.atividades.anki.length;
+            dia.atividades.anki.forEach(a => {
+              totais.totalTime += a.tempo;
+              totais.totalFlashcards += a.cards;
+            });
+          }
+          
+          if (dia.atividades.teoria && dia.atividades.teoria.length > 0) {
+            dia.atividades.teoria.forEach(t => {
+              totais.totalTime += t.tempo;
+            });
+          }
+        });
+        
+        return totais;
+      }
+      
+      generateRelatorioHTML(periodo, atualTotais, anteriorTotais) {
+        const diffTime = atualTotais.totalTime - anteriorTotais.totalTime;
+        const diffQuestoes = atualTotais.totalQuestoes - anteriorTotais.totalQuestoes;
+        const diffAnkiDecks = atualTotais.totalAnkiDecks - anteriorTotais.totalAnkiDecks;
+        const diffFlashcards = atualTotais.totalFlashcards - anteriorTotais.totalFlashcards;
+        const atualAcertosPercent = atualTotais.totalQuestoes > 0 ? (atualTotais.totalAcertos / atualTotais.totalQuestoes) * 100 : 0;
+        const anteriorAcertosPercent = anteriorTotais.totalQuestoes > 0 ? (anteriorTotais.totalAcertos / anteriorTotais.totalQuestoes) * 100 : 0;
+        const diffAcertosPercent = atualAcertosPercent - anteriorAcertosPercent;
+        const atualHours = Math.floor(atualTotais.totalTime / 60);
+        const atualMinutes = atualTotais.totalTime % 60;
+        
+        return `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-chart-bar"></i>
+              <div class="message-card-title">Relatório Periódico (${periodo} dias)</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${atualHours}h ${atualMinutes}m</div>
+                  <div class="message-stat-label">Tempo Total</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${atualTotais.totalQuestoes}</div>
+                  <div class="message-stat-label">Questões</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${atualAcertosPercent.toFixed(1)}%</div>
+                  <div class="message-stat-label">Acertos</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${atualTotais.totalFlashcards}</div>
+                  <div class="message-stat-label">Flashcards</div>
+                </div>
+              </div>
+              
+              <div class="message-section">
+                <div class="message-section-title">Comparação com Período Anterior</div>
+                <div class="message-list">
+                  <div class="message-list-item">
+                    <div class="message-list-icon">⏱️</div>
+                    <div class="message-list-content">
+                      <div class="message-list-title">Horas estudadas</div>
+                      <div class="message-list-description">
+                        ${diffTime > 0 ? 
+                          `<span style="color: var(--success)">+${diffTime} min</span> em relação ao período anterior` : 
+                          diffTime < 0 ? 
+                          `<span style="color: var(--danger)">${diffTime} min</span> em relação ao período anterior` : 
+                          'Mesmo tempo de estudo que o período anterior'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="message-list-item">
+                    <div class="message-list-icon">🧩</div>
+                    <div class="message-list-content">
+                      <div class="message-list-title">Questões resolvidas</div>
+                      <div class="message-list-description">
+                        ${diffQuestoes > 0 ? 
+                          `<span style="color: var(--success)">+${diffQuestoes} questões</span> em relação ao período anterior` : 
+                          diffQuestoes < 0 ? 
+                          `<span style="color: var(--danger)">${diffQuestoes} questões</span> em relação ao período anterior` : 
+                          'Mesma quantidade de questões que o período anterior'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="message-list-item">
+                    <div class="message-list-icon">📊</div>
+                    <div class="message-list-content">
+                      <div class="message-list-title">Porcentagem de acertos</div>
+                      <div class="message-list-description">
+                        ${diffAcertosPercent > 0 ? 
+                          `<span style="color: var(--success)">+${diffAcertosPercent.toFixed(1)}%</span> em relação ao período anterior` : 
+                          diffAcertosPercent < 0 ? 
+                          `<span style="color: var(--danger)">${diffAcertosPercent.toFixed(1)}%</span> em relação ao período anterior` : 
+                          'Mesma porcentagem de acertos que o período anterior'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="message-list-item">
+                    <div class="message-list-icon">🔁</div>
+                    <div class="message-list-content">
+                      <div class="message-list-title">Flashcards revisados</div>
+                      <div class="message-list-description">
+                        ${diffFlashcards > 0 ? 
+                          `<span style="color: var(--success)">+${diffFlashcards} flashcards</span> em relação ao período anterior` : 
+                          diffFlashcards < 0 ? 
+                          `<span style="color: var(--danger)">${diffFlashcards} flashcards</span> em relação ao período anterior` : 
+                          'Mesma quantidade de flashcards que o período anterior'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      getTodayDecks() {
+        const ankiData = this.getModuleData('ciclos_focus_v1');
+        if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
+        
+        const perDay = ankiData.perDay;
+        const blockIndex = ankiData.blockIndex || 0;
+        const startIndex = blockIndex * perDay;
+        const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
+        
+        return todayDecks.map(deck => deck.name);
+      }
+      
+      getTodayTasks() {
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().split('T')[0];
+        
+        const tasks = { questoes: [], anki: [], teoria: [] };
+        
+        tasks.questoes = this.calculateTodayReviews();
+        tasks.anki = this.getTodayDecks().map(deckName => ({ id: deckName, nome: deckName, emoji: '🔁' }));
+        
+        const activeCycle = this.getActiveCycle();
+        if (activeCycle && activeCycle.generatedCycle) {
+          tasks.teoria = this.getTodaySubjects();
+        }
+        
+        return tasks;
+      }
+      
+      activateTask(button) {
+        const card = button.closest('.task-card');
+        
+        if (card.classList.contains('disabled')) {
+          card.classList.remove('disabled');
+          card.classList.add('active');
+          
+          const inputs = card.querySelectorAll('input');
+          inputs.forEach(input => {
+            input.disabled = false;
+          });
+        } else {
+          card.classList.remove('active');
+          card.classList.add('disabled');
+          
+          const inputs = card.querySelectorAll('input');
+          inputs.forEach(input => {
+            input.disabled = true;
+          });
+        }
+      }
+      
+      loadTodayTasks() {
+        const modalBody = document.getElementById('registerModalBody');
+        modalBody.innerHTML = '';
+        
+        const todayTasks = this.getTodayTasks();
+        
+        if (todayTasks.questoes.length === 0 && todayTasks.anki.length === 0 && todayTasks.teoria.length === 0) {
+          modalBody.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-check-circle"></i>
+              <h3>Não há tarefas pendentes para hoje!</h3>
+              <p>Parabéns! Você já concluiu todas as tarefas de hoje ou não há atividades programadas.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        let tasksHTML = '<div class="tasks-grid">';
+        
+        todayTasks.questoes.forEach(questao => {
+          tasksHTML += this.createQuestaoCard(questao);
+        });
+        
+        todayTasks.anki.forEach(deck => {
+          tasksHTML += this.createAnkiCard(deck);
+        });
+        
+        todayTasks.teoria.forEach(materia => {
+          tasksHTML += this.createTeoriaCard(materia);
+        });
+        
+        tasksHTML += '</div>';
+        modalBody.innerHTML = tasksHTML;
+      }
+      
+      createQuestaoCard(questao) {
+        return `
+          <div class="task-card disabled" data-type="questoes" data-id="${questao.id}">
+            <div class="task-header">
+              <div class="task-icon-large">🧩</div>
+              <div class="task-title">Questões: ${questao.disciplina}</div>
+              <button class="activate-btn" onclick="chatBot.activateTask(this)">Ativar</button>
+            </div>
+            <div class="task-description">
+              <strong>Assunto:</strong> ${questao.nome}
+            </div>
+            <div class="task-form">
+              <div class="form-group">
+                <label for="questoes-feitas-${questao.id}">Quantidade de questões feitas</label>
+                <input type="number" id="questoes-feitas-${questao.id}" min="0" placeholder="Ex: 20" disabled>
+              </div>
+              <div class="form-group">
+                <label for="questoes-erradas-${questao.id}">Quantidade de questões erradas</label>
+                <input type="number" id="questoes-erradas-${questao.id}" min="0" placeholder="Ex: 5" disabled>
+              </div>
+              <div class="form-group">
+                <label for="questoes-tempo-${questao.id}">Tempo total gasto (minutos)</label>
+                <input type="number" id="questoes-tempo-${questao.id}" min="0" placeholder="Ex: 45" disabled>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      createAnkiCard(deck) {
+        return `
+          <div class="task-card disabled" data-type="anki" data-id="${deck.id}">
+            <div class="task-header">
+              <div class="task-icon-large">${deck.emoji}</div>
+              <div class="task-title">Revisão Anki</div>
+              <button class="activate-btn" onclick="chatBot.activateTask(this)">Ativar</button>
+            </div>
+            <div class="task-description">
+              <strong>Baralho:</strong> ${deck.nome}
+            </div>
+            <div class="task-form">
+              <div class="form-group">
+                <label for="anki-tempo-${deck.id}">Tempo de estudo (minutos)</label>
+                <input type="number" id="anki-tempo-${deck.id}" min="0" placeholder="Ex: 30" disabled>
+              </div>
+              <div class="form-group">
+                <label for="anki-cards-${deck.id}">Quantidade de cards revisados</label>
+                <input type="number" id="anki-cards-${deck.id}" min="0" placeholder="Ex: 50" disabled>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      createTeoriaCard(materia) {
+        return `
+          <div class="task-card disabled" data-type="teoria" data-id="${materia}">
+            <div class="task-header">
+              <div class="task-icon-large">📚</div>
+              <div class="task-title">Estudo Teórico</div>
+              <button class="activate-btn" onclick="chatBot.activateTask(this)">Ativar</button>
+            </div>
+            <div class="task-description">
+              <strong>Matéria:</strong> ${materia}
+            </div>
+            <div class="task-form">
+              <div class="form-group">
+                <label for="teoria-conteudo-${materia}">Conteúdo estudado (PDF/Aula)</label>
+                <input type="text" id="teoria-conteudo-${materia}" placeholder="Ex: PDF Aula 1, Video Aula 2" disabled>
+              </div>
+              <div class="form-group">
+                <label for="teoria-pagina-${materia}">Página/Progresso</label>
+                <input type="text" id="teoria-pagina-${materia}" placeholder="Ex: Página 42, 50% concluído" disabled>
+              </div>
+              <div class="form-group">
+                <label for="teoria-tempo-${materia}">Tempo de estudo (minutos)</label>
+                <input type="number" id="teoria-tempo-${materia}" min="0" placeholder="Ex: 60" disabled>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      saveSelectedTasks() {
+        const activeCards = document.querySelectorAll('.task-card.active');
+        let hasError = false;
+        let savedCount = 0;
+        let totalTime = 0;
+        let activities = { questoes: [], anki: [], teoria: [] };
+        
+        if (activeCards.length === 0) {
+          alert('Por favor, selecione pelo menos uma atividade para registrar.');
+          return;
+        }
+        
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().split('T')[0];
+        
+        activeCards.forEach(card => {
+          const type = card.getAttribute('data-type');
+          const id = card.getAttribute('data-id');
+          
+          if (type === 'questoes') {
+            const feitas = document.getElementById(`questoes-feitas-${id}`).value;
+            const erradas = document.getElementById(`questoes-erradas-${id}`).value;
+            const tempo = document.getElementById(`questoes-tempo-${id}`).value;
+            
+            if (!feitas || !tempo) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              this.saveQuestoes(id, feitas, erradas, tempo, hojeStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.questoes.push({
+                assunto: id,
+                feitas: parseInt(feitas),
+                erradas: parseInt(erradas),
+                tempo: parseInt(tempo)
+              });
+            }
+          } else if (type === 'anki') {
+            const tempo = document.getElementById(`anki-tempo-${id}`).value;
+            const cards = document.getElementById(`anki-cards-${id}`).value;
+            
+            if (!tempo || !cards) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              this.saveAnki(id, tempo, cards, hojeStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.anki.push({
+                deck: id,
+                tempo: parseInt(tempo),
+                cards: parseInt(cards)
+              });
+            }
+          } else if (type === 'teoria') {
+            const conteudo = document.getElementById(`teoria-conteudo-${id}`).value;
+            const pagina = document.getElementById(`teoria-pagina-${id}`).value;
+            const tempo = document.getElementById(`teoria-tempo-${id}`).value;
+            
+            if (!tempo) {
+              hasError = true;
+              card.style.border = '1px solid red';
+            } else {
+              card.style.border = '';
+              // CORREÇÃO APLICADA: Usar a função updateStudyCycle corrigida
+              this.saveTeoria(id, conteudo, pagina, tempo, hojeStr);
+              savedCount++;
+              totalTime += parseInt(tempo);
+              activities.teoria.push({
+                materia: id,
+                conteudo: conteudo,
+                pagina: pagina,
+                tempo: parseInt(tempo)
+              });
+            }
+          }
+        });
+        
+        if (hasError) {
+          alert('Preencha todos os campos obrigatórios das atividades selecionadas!');
+          return;
+        }
+        
+        localStorage.setItem('lastRegisterDate', hojeStr);
+        
+        const dailyActivities = {
+          date: hojeStr,
+          activities: activities
+        };
+        localStorage.setItem('dailyActivities', JSON.stringify(dailyActivities));
+        localStorage.setItem(`dailyActivities_${hojeStr}`, JSON.stringify(dailyActivities));
+        
+        this.closeRegisterModal();
+        
+        if (savedCount > 0) {
+          this.showRegistrationSummary(savedCount, totalTime, activities);
+        }
+      }
+      
+      showRegistrationSummary(savedCount, totalTime, activities, isYesterday = false) {
+        const successMessage = `
+          <div class="message-bubble bot-bubble message-alert-success">
+            <div class="message-content">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+                <i class="fas fa-check-circle" style="color: var(--success)"></i>
+                <strong>${savedCount} atividade(s) registrada(s) com sucesso${isYesterday ? ' para ontem' : ''}!</strong>
+              </div>
+              <div class="message-text">
+                Seu progresso foi salvo e suas próximas revisões foram atualizadas.
+              </div>
+            </div>
+            <div class="bubble-time">${this.formatTime(new Date())}</div>
+          </div>
+        `;
+        
+        const chatMessages = document.getElementById('chatMessages');
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container bot-container';
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar bot-avatar-small';
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        messageContainer.appendChild(avatar);
+        messageContainer.innerHTML = successMessage;
+        chatMessages.appendChild(messageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        setTimeout(() => {
+          let summaryHTML = `
+            <div class="message-card">
+              <div class="message-card-header">
+                <i class="fas fa-chart-bar"></i>
+                <div class="message-card-title">Resumo das Atividades${isYesterday ? ' de Ontem' : ' de Hoje'}</div>
+              </div>
+              <div class="message-card-content">
+          `;
+          
+          if (activities.questoes.length > 0) {
+            summaryHTML += `<div class="message-section-title">🧩 Questões</div>`;
+            activities.questoes.forEach(q => {
+              const acertos = q.feitas - q.erradas;
+              const taxaAcerto = q.feitas > 0 ? Math.round((acertos / q.feitas) * 100) : 0;
+              
+              summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${q.assunto}</div>
+                    <div class="message-list-description">${q.feitas} questões (${taxaAcerto}% acerto)</div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          if (activities.anki.length > 0) {
+            summaryHTML += `<div class="message-section-title">🔁 Anki</div>`;
+            activities.anki.forEach(a => {
+              summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${a.deck}</div>
+                    <div class="message-list-description">${a.cards} cards revisados</div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          if (activities.teoria.length > 0) {
+            summaryHTML += `<div class="message-section-title">📚 Teoria</div>`;
+            activities.teoria.forEach(t => {
+              summaryHTML += `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">${t.materia}</div>
+                    <div class="message-list-description">${t.conteudo || t.pagina || 'Estudo'}</div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          summaryHTML += `
+                <div class="message-divider"></div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-clock"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Tempo Total</div>
+                    <div class="message-list-description">${totalTime} minutos</div>
+                  </div>
+                </div>
+          `;
+          
+          summaryHTML += `</div></div>`;
+          this.addBotMessage(summaryHTML, false);
+          
+          setTimeout(() => {
+            const nextReviews = this.getNextReviewDates();
+            if (nextReviews.length > 0) {
+              let nextReviewsHTML = `
+                <div class="message-card">
+                  <div class="message-card-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="message-card-title">Próximas Revisões</div>
+                  </div>
+                  <div class="message-card-content">
+              `;
+              
+              nextReviews.forEach(review => {
+                nextReviewsHTML += `
+                  <div class="message-list-item">
+                    <div class="message-list-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="message-list-content">
+                      <div class="message-list-title">${review.assunto}</div>
+                      <div class="message-list-description">${review.data}</div>
+                    </div>
+                  </div>
+                `;
+              });
+              
+              nextReviewsHTML += `</div></div>`;
+              this.addBotMessage(nextReviewsHTML, false);
+            }
+          }, 500);
+        }, 500);
+      }
+      
+      getNextReviewDates() {
+        const disciplines = this.getModuleData('disciplines');
+        const nextReviews = [];
+        const hoje = new Date();
+        
+        if (disciplines && Array.isArray(disciplines)) {
+          disciplines.forEach(disciplina => {
+            if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+              disciplina.assuntos.forEach(assunto => {
+                if (assunto.nextReviewDate) {
+                  const nextDate = new Date(assunto.nextReviewDate);
+                  if (nextDate > hoje) {
+                    nextReviews.push({
+                      assunto: assunto.nome,
+                      disciplina: disciplina.name,
+                      data: nextDate.toLocaleDateString('pt-BR')
+                    });
+                  }
+                }
+              });
+            }
+          });
+        }
+        
+        return nextReviews
+          .sort((a, b) => new Date(a.data) - new Date(b.data))
+          .slice(0, 3);
+      }
+      
+      // ==================== FUNÇÕES DE UTILITÁRIO ====================
+      
+      toggleTheme() {
+        if (this.currentTheme === 'light') {
+          document.body.classList.add('dark-theme');
+          document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+          this.currentTheme = 'dark';
+        } else {
+          document.body.classList.remove('dark-theme');
+          document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+          this.currentTheme = 'light';
+        }
+        localStorage.setItem('theme', this.currentTheme);
+      }
+      
+      addUserMessage(content) {
+        this.addMessageToChat(content, true);
+      }
+      
+      getModuleData(key) {
+        try {
+          const data = localStorage.getItem(key);
+          return data ? JSON.parse(data) : null;
+        } catch (e) {
+          console.error(`Erro ao carregar dados do módulo: ${key}`, e);
+          return null;
+        }
+      }
+      
+      setModuleData(key, data) {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+          return true;
+        } catch (e) {
+          console.error(`Erro ao salvar dados no módulo: ${key}`, e);
+          return false;
+        }
+      }
+      
+      calculateTodayReviews(date = null) {
+        const disciplines = this.getModuleData('disciplines');
+        const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+        
+        if (!disciplines || !Array.isArray(disciplines)) return [];
+        
+        const targetDate = date || new Date();
+        const targetTimestamp = targetDate.getTime();
+        
+        let pendingTopics = [];
+        
+        disciplines.forEach(disciplina => {
+          if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+            disciplina.assuntos.forEach(assunto => {
+              if (assunto.suspended) return;
+              
+              if (assunto.nextReviewDate && assunto.nextReviewDate <= targetTimestamp) {
+                const daysOverdue = Math.max(0, Math.floor((targetTimestamp - assunto.nextReviewDate) / (1000 * 60 * 60 * 24)));
+                
+                let avgDifficulty = 2;
+                if (assunto.difficultyHistory && assunto.difficultyHistory.length > 0) {
+                  avgDifficulty = assunto.difficultyHistory.reduce((a, b) => a + b, 0) / assunto.difficultyHistory.length;
+                }
+                const difficultyScore = (3 - avgDifficulty);
+                
+                const importance = assunto.importance || 3;
+                const priority = (difficultyScore * 40) + (daysOverdue * 60) + (importance * 20);
+                
+                pendingTopics.push({
+                  id: assunto.nome,
+                  nome: assunto.nome,
+                  disciplina: disciplina.name,
+                  priority: priority,
+                  daysOverdue: daysOverdue,
+                  difficulty: avgDifficulty,
+                  importance: importance
+                });
+              }
+            });
+          }
+        });
+        
+        pendingTopics.sort((a, b) => b.priority - a.priority);
+        return pendingTopics.slice(0, dailyReviewGoal);
+      }
+      
+      calculateOverdueReviews() {
+        const disciplines = this.getModuleData('disciplines');
+        if (!disciplines || !Array.isArray(disciplines)) return 0;
+        
+        const hoje = new Date();
+        const todayTimestamp = hoje.getTime();
+        
+        let atrasadas = 0;
+        
+        disciplines.forEach(disciplina => {
+          if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+            disciplina.assuntos.forEach(assunto => {
+              if (assunto.nextReviewDate && assunto.nextReviewDate < todayTimestamp && !assunto.suspended) {
+                atrasadas++;
+              }
+            });
+          }
+        });
+        
+        return atrasadas;
+      }
+      
+      getPerformanceBasedInterval(accuracy) {
+        accuracy = Math.max(0, Math.min(100, accuracy));
+        
+        if (accuracy >= 100) return 12;
+        if (accuracy >= 80) return 9;
+        if (accuracy >= 60) return 6;
+        if (accuracy >= 40) return 3;
+        return 1;
+      }
+      
+      calculateNextReviewSM2(q, currentEF, currentInterval, repetitions) {
+        let newEF = currentEF + (0.1 - (3 - q) * (0.08 + (3 - q) * 0.02));
+        newEF = Math.max(1.3, Math.min(newEF, 2.5));
+        
+        let newInterval;
+        
+        if (q < 2) {
+          newInterval = 1;
+          repetitions = 0;
+        } else {
+          if (repetitions === 0) {
+            newInterval = 1;
+          } else if (repetitions === 1) {
+            newInterval = 3;
+          } else {
+            newInterval = Math.round(currentInterval * newEF);
+          }
+          repetitions++;
+        }
+        
+        return { newInterval, newEF, repetitions };
+      }
+      
+      calculateMemoryStrength(topic) {
+        if (!topic.lastReviewed) return 0.5;
+        
+        const now = this.getToday();
+        const lastReview = topic.lastReviewed;
+        const diffTime = Math.max(0, now - lastReview);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        const baseStrength = 0.9;
+        const decayRate = 0.15;
+        
+        let strength = baseStrength * Math.exp(-decayRate * diffDays);
+        
+        if (topic.difficultyHistory && topic.difficultyHistory.length > 0) {
+          const avgDifficulty = topic.difficultyHistory.reduce((a, b) => a + b, 0) / topic.difficultyHistory.length;
+          strength *= (1 - (avgDifficulty * 0.15));
+        }
+        
+        return Math.min(Math.max(strength, 0.1), 0.95);
+      }
+      
+      getToday() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return today.getTime();
+      }
+      
+      trocarBaralhos() {
+        const ankiData = this.getModuleData('ciclos_focus_v1');
+        if (!ankiData) {
+          this.typeMessage("Não foi possível encontrar os dados dos baralhos Anki.");
+          return;
+        }
+
+        const totalDecks = ankiData.decks.length;
+        const perDay = ankiData.perDay;
+        const totalBlocks = Math.ceil(totalDecks / perDay);
+
+        ankiData.blockIndex = (ankiData.blockIndex + 1) % totalBlocks;
+        ankiData.lastUpdated = new Date().toDateString();
+
+        this.setModuleData('ciclos_focus_v1', ankiData);
+
+        this.typeMessage(`Baralhos trocados! Agora são os baralhos do bloco ${ankiData.blockIndex + 1} de ${totalBlocks}.`);
+      }
+      
+      closeRegisterModal() {
+        document.getElementById('registerModal').style.display = 'none';
+      }
+      
+      addMessageToChat(content, isUser = false, timestamp = null, messageId = null) {
+        if (messageId && this.messageIds.has(messageId)) return;
+        
+        if (messageId) this.messageIds.add(messageId);
+        
+        const chatMessages = document.getElementById('chatMessages');
+        const messageContainer = document.createElement('div');
+        messageContainer.className = `message-container ${isUser ? 'user-container' : 'bot-container'}`;
+        
+        if (!isUser) {
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar bot-avatar-small';
+          avatar.innerHTML = '<i class="fas fa-robot"></i>';
+          messageContainer.appendChild(avatar);
+        }
+        
+        const messageBubble = document.createElement('div');
+        messageBubble.className = `message-bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`;
+        
+        const processedContent = this.parseMarkdown(content);
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.innerHTML = processedContent;
+        
+        const messageTime = document.createElement('div');
+        messageTime.className = 'bubble-time';
+        messageTime.textContent = timestamp ? this.formatTime(new Date(timestamp)) : this.formatTime(new Date());
+        
+        messageBubble.appendChild(messageContent);
+        messageBubble.appendChild(messageTime);
+        
+        if (isUser) {
+          const reaction = document.createElement('div');
+          reaction.className = 'message-reaction';
+          reaction.innerHTML = '<span class="reaction-icon"><i class="fas fa-check-double"></i></span>';
+          messageBubble.appendChild(reaction);
+        }
+        
+        messageContainer.appendChild(messageBubble);
+        
+        if (isUser) {
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar user-avatar-small';
+          avatar.innerHTML = '<i class="fas fa-user"></i>';
+          messageContainer.appendChild(avatar);
+        }
+        
+        chatMessages.appendChild(messageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.chatHistory.push({
+          content: content,
+          isUser: isUser,
+          timestamp: timestamp || new Date().toISOString()
+        });
+        
+        if (this.chatHistory.length > 3) {
+          this.chatHistory = this.chatHistory.slice(-3);
+        }
+        
+        localStorage.setItem('chatHistory', JSON.stringify(this.chatHistory));
+      }
+      
+      parseMarkdown(text) {
+        return text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+      }
+      
+      addBotMessage(content, saveToHistory = true, messageId = null) {
+        if (saveToHistory) {
+          this.addMessageToChat(content, false, null, messageId);
+        } else {
+          const chatMessages = document.getElementById('chatMessages');
+          const messageContainer = document.createElement('div');
+          messageContainer.className = 'message-container bot-container';
+          
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar bot-avatar-small';
+          avatar.innerHTML = '<i class="fas fa-robot"></i>';
+          messageContainer.appendChild(avatar);
+          
+          const messageBubble = document.createElement('div');
+          messageBubble.className = 'message-bubble bot-bubble';
+          
+          const processedContent = this.parseMarkdown(content);
+          
+          const messageContent = document.createElement('div');
+          messageContent.className = 'message-content';
+          messageContent.innerHTML = processedContent;
+          
+          const messageTime = document.createElement('div');
+          messageTime.className = 'bubble-time';
+          messageTime.textContent = this.formatTime(new Date());
+          
+          messageBubble.appendChild(messageContent);
+          messageBubble.appendChild(messageTime);
+          
+          messageContainer.appendChild(messageBubble);
+          chatMessages.appendChild(messageContainer);
+          
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }
+      
+      typeMessage(text, callback = null, messageId = null) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container bot-container';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar bot-avatar-small';
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        messageContainer.appendChild(avatar);
+        
+        const messageBubble = document.createElement('div');
+        messageBubble.className = 'message-bubble bot-bubble';
+        
+        const processedText = this.parseMarkdown(text);
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.innerHTML = `<span class="typing-text">${processedText}</span>`;
+        
+        const messageTime = document.createElement('div');
+        messageTime.className = 'bubble-time';
+        messageTime.textContent = this.formatTime(new Date());
+        
+        messageBubble.appendChild(messageContent);
+        messageBubble.appendChild(messageTime);
+        
+        messageContainer.appendChild(messageBubble);
+        chatMessages.appendChild(messageContainer);
+        
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.chatHistory.push({
+          content: text,
+          isUser: false,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (this.chatHistory.length > 3) {
+          this.chatHistory = this.chatHistory.slice(-3);
+        }
+        
+        localStorage.setItem('chatHistory', JSON.stringify(this.chatHistory));
+        
+        if (callback) {
+          setTimeout(callback, text.length * 30 + 300);
+        }
+      }
+      
+      showTypingIndicator() {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container bot-container';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar bot-avatar-small';
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        messageContainer.appendChild(avatar);
+        
+        const typingBubble = document.createElement('div');
+        typingBubble.className = 'typing-indicator';
+        typingBubble.id = 'typingIndicator';
+        typingBubble.innerHTML = `
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        `;
+        
+        messageContainer.appendChild(typingBubble);
+        chatMessages.appendChild(messageContainer);
+        
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) {
+          typingIndicator.parentElement.remove();
+        }
+      }
+      
+      sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        
+        if (message) {
+          this.addUserMessage(message);
+          input.value = '';
+          
+          this.showTypingIndicator();
+          setTimeout(() => {
+            this.hideTypingIndicator();
+            this.processUserMessage(message);
+          }, 1000 + Math.random() * 1000);
+        }
+      }
+      
+      processUserMessage(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('resumo') || lowerMessage.includes('como estou') || lowerMessage.includes('tarefas')) {
+          this.showDailySummary();
+        } else if (lowerMessage.includes('registrar') || lowerMessage.includes('adicionar')) {
+          this.openRegisterModal();
+        } else if (lowerMessage.includes('configurar') || lowerMessage.includes('config')) {
+          this.showConfigModal();
+        } else if (lowerMessage.includes('ajuda') || lowerMessage.includes('comandos')) {
+          this.showHelp();
+        } else if (lowerMessage.includes('info') || lowerMessage.includes('sobre')) {
+          this.showInfo();
+        } else if (lowerMessage.includes('edital')) {
+          this.showEditalMenu();
+        } else if (lowerMessage.includes('simulado')) {
+          this.showSimuladosMenu();
+        } else if (lowerMessage.includes('reset')) {
+          this.showResetConfirmation();
+        } else {
+          this.typeMessage("Entendi sua mensagem! Posso te ajudar com:\n\n• <strong>Resumo do dia</strong>\n• <strong>Registrar atividades</strong>\n• <strong>Edital</strong>\n• <strong>Simulados</strong>\n• <strong>Configurações</strong>\n• <strong>Ajuda e informações</strong>\n\nO que você gostaria de fazer?");
+        }
+      }
+      
+      showHelp() {
+        const helpCard = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-question-circle"></i>
+              <div class="message-card-title">Como posso ajudá-lo?</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-list">
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-calendar-day"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Resumo do dia</div>
+                    <div class="message-list-description">Mostrar tarefas e progresso atual</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-plus-circle"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Registrar atividades</div>
+                    <div class="message-list-description">Questões, Anki ou teoria</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-history"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Registrar atividades de ontem</div>
+                    <div class="message-list-description">Para quando esqueceu de registrar no dia anterior</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-file-alt"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Edital</div>
+                    <div class="message-list-description">Ver progresso no edital completo ou por matéria</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-chart-line"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Simulados</div>
+                    <div class="message-list-description">Ver notas e relatórios de simulados</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-calendar-alt"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Programar Simulado</div>
+                    <div class="message-list-description">Definir intervalos para simulados</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-chart-bar"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Relatório Periódico</div>
+                    <div class="message-list-description">Gerar relatórios de desempenho</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-sync-alt"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Trocar Baralhos</div>
+                    <div class="message-list-description">Corrigir manualmente a ordem dos baralhos do dia</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-cog"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Configurar</div>
+                    <div class="message-list-description">Ajustar quantidade de matérias por dia</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-question-circle"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Ajuda</div>
+                    <div class="message-list-description">Mostrar esta mensagem de ajuda</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-info"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Informações</div>
+                    <div class="message-list-description">Sobre o StudyFlow</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Reset</div>
+                    <div class="message-list-description">Função temporária para corrigir travamentos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        this.addBotMessage(helpCard, true, 'help-message');
+      }
+      
+      showInfo() {
+        const infoCard = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-info-circle"></i>
+              <div class="message-card-title">Sobre o StudyFlow</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-text">
+                O StudyFlow é seu assistente pessoal de estudos, integrando todas as suas ferramentas de aprendizado em um só lugar.
+              </div>
+              <div class="message-muted" style="margin-top: 10px">
+                Comigo você pode:
+              </div>
+              <div class="message-list" style="margin-top: 8px">
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Gerenciar seu ciclo de estudos</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Registrar questões e revisões</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Acompanhar seu progresso no edital</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Analisar desempenho em simulados</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Receber alertas e lembretes</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Programar simulados</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Gerar relatórios periódicos</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Corrigir manualmente a ordem dos baralhos</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Registrar atividades do dia anterior</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        this.addBotMessage(infoCard, true, 'info-message');
+      }
+      
+      showQuickActions() {
+        this.addBotMessage(`
+          <div class="quick-actions">
+            <button class="action-btn primary" onclick="chatBot.showDailySummary()">
+              <i class="fas fa-calendar-day"></i> Resumo do Dia
+            </button>
+            <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
+              <i class="fas fa-plus-circle"></i> Registrar
+            </button>
+            <button class="action-btn info" onclick="chatBot.openYesterdayModal()">
+              <i class="fas fa-history"></i> Registrar Atividades de Ontem
+            </button>
+            <button class="action-btn info" onclick="chatBot.showEditalMenu()">
+              <i class="fas fa-file-alt"></i> Edital
+            </button>
+            <button class="action-btn info" onclick="chatBot.showSimuladosMenu()">
+              <i class="fas fa-chart-line"></i> Simulados
+            </button>
+            <button class="action-btn info" onclick="chatBot.showSimuladoModal()">
+              <i class="fas fa-calendar-alt"></i> Programar Simulado
+            </button>
+            <button class="action-btn info" onclick="chatBot.showRelatorioModal()">
+              <i class="fas fa-chart-bar"></i> Relatório
+            </button>
+            <button class="action-btn info" onclick="chatBot.trocarBaralhos()">
+              <i class="fas fa-sync-alt"></i> Trocar Baralhos
+            </button>
+            <button class="action-btn info" onclick="chatBot.showConfigModal()">
+              <i class="fas fa-cog"></i> Configurar
+            </button>
+            <button class="action-btn info" onclick="chatBot.showHelp()">
+              <i class="fas fa-question-circle"></i> Ajuda
+            </button>
+            <button class="action-btn info" onclick="chatBot.showInfo()">
+              <i class="fas fa-info"></i> Informações
+            </button>
+            <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
+              <i class="fas fa-exclamation-triangle"></i> Reset
+            </button>
+          </div>
+        `, false);
+      }
+      
+      toggleEmojiPicker() {
+        const emojis = ["😊", "👍", "❤️", "🔥", "⭐", "📚", "🎯", "💡", "🚀", "✅"];
+        
+        let emojiHTML = '<div class="quick-actions">';
+        emojis.forEach(emoji => {
+          emojiHTML += `<button class="action-btn" onclick="chatBot.addEmoji('${emoji}')">${emoji}</button>`;
+        });
+        emojiHTML += '</div>';
+        
+        this.addBotMessage(emojiHTML, false);
+      }
+      
+      addEmoji(emoji) {
+        const input = document.getElementById('messageInput');
+        input.value += emoji;
+        input.focus();
+      }
+      
+      showEditalMenu() {
+        const editalData = this.getEditalData();
+        if (!editalData) {
+          this.typeMessage("Não encontrei dados do edital verticalizado. Verifique se você já importou um edital no módulo correspondente.");
+          return;
+        }
+        
+        this.addBotMessage(`
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-file-alt"></i>
+              <div class="message-card-title">Progresso no Edital</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-text">
+                Você quer ver seu progresso no edital completo ou em uma matéria específica?
+              </div>
+              <div class="quick-actions" style="margin-top: 12px">
+                <button class="action-btn primary" onclick="chatBot.showEditalCompleto()">
+                  <i class="fas fa-chart-pie"></i> Todo o Edital
+                </button>
+                <button class="action-btn secondary" onclick="chatBot.showMateriasEdital()">
+                  <i class="fas fa-book"></i> Matéria Específica
+                </button>
+              </div>
+            </div>
+          </div>
+        `, true, 'edital-menu');
+      }
+      
+      getEditalData() {
+        try {
+          const editais = JSON.parse(localStorage.getItem('editais'));
+          const editalAtivoId = localStorage.getItem('editalAtivoId');
+          
+          if (!editais || !editalAtivoId) return null;
+          
+          const editalAtivo = editais.find(edital => edital.id === editalAtivoId);
+          if (!editalAtivo) return null;
+          
+          const completedTopicsKey = `completedTopics_${editalAtivoId}`;
+          const completedTopics = JSON.parse(localStorage.getItem(completedTopicsKey)) || {};
+          
+          return { edital: editalAtivo, progresso: completedTopics };
+        } catch (error) {
+          console.error('Erro ao buscar dados do edital:', error);
+          return null;
+        }
+      }
+      
+      showEditalCompleto() {
+        const editalData = this.getEditalData();
+        if (!editalData) {
+          this.typeMessage("Não foi possível carregar os dados do edital.");
+          return;
+        }
+        
+        const { edital, progresso } = editalData;
+        
+        let totalTopicos = 0;
+        let topicosConcluidos = 0;
+        
+        edital.disciplinas.forEach(disciplina => {
+          disciplina.topicos.forEach(topico => {
+            totalTopicos++;
+            const chaveTopico = `${disciplina.nome}-${topico}`;
+            if (progresso[chaveTopico]) {
+              topicosConcluidos++;
+            }
+          });
+        });
+        
+        const porcentagemTotal = totalTopicos > 0 ? Math.round((topicosConcluidos / totalTopicos) * 100) : 0;
+        
+        const progressoDisciplinas = edital.disciplinas.map(disciplina => {
+          let topicosDisciplina = 0;
+          let concluidosDisciplina = 0;
+          
+          disciplina.topicos.forEach(topico => {
+            topicosDisciplina++;
+            const chaveTopico = `${disciplina.nome}-${topico}`;
+            if (progresso[chaveTopico]) {
+              concluidosDisciplina++;
+            }
+          });
+          
+          const porcentagem = topicosDisciplina > 0 ? Math.round((concluidosDisciplina / topicosDisciplina) * 100) : 0;
+          
+          return {
+            nome: disciplina.nome,
+            concluidos: concluidosDisciplina,
+            total: topicosDisciplina,
+            porcentagem: porcentagem
+          };
+        });
+        
+        progressoDisciplinas.sort((a, b) => a.porcentagem - b.porcentagem);
+        
+        let relatorioHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-chart-pie"></i>
+              <div class="message-card-title">Progresso Geral do Edital</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${porcentagemTotal}%</div>
+                  <div class="message-stat-label">Concluído</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${topicosConcluidos}/${totalTopicos}</div>
+                  <div class="message-stat-label">Tópicos</div>
+                </div>
+              </div>
+              <div class="message-progress">
+                <div class="message-progress-bar">
+                  <div class="message-progress-fill" style="width: ${porcentagemTotal}%"></div>
+                </div>
+                <div class="message-progress-text">
+                  <span>0%</span>
+                  <span>${porcentagemTotal}%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+              <div class="message-section">
+                <div class="message-section-title">Progresso por Disciplina</div>
+                <div class="message-list">
+        `;
+        
+        progressoDisciplinas.forEach(disciplina => {
+          const statusClass = disciplina.porcentagem >= 80 ? 'success' : disciplina.porcentagem >= 50 ? 'warning' : 'danger';
+          
+          relatorioHTML += `
+            <div class="message-list-item">
+              <div class="message-list-icon"><i class="fas fa-book"></i></div>
+              <div class="message-list-content">
+                <div class="message-list-title">${disciplina.nome}</div>
+                <div class="message-list-description">
+                  ${disciplina.concluidos}/${disciplina.total} tópicos
+                  <span class="message-badge message-badge-${statusClass}">${disciplina.porcentagem}%</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        relatorioHTML += `
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(relatorioHTML, true, 'edital-completo');
+      }
+      
+      showMateriasEdital() {
+        const editalData = this.getEditalData();
+        if (!editalData) {
+          this.typeMessage("Não foi possível carregar os dados do edital.");
+          return;
+        }
+        
+        const { edital } = editalData;
+        
+        let materiasHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-book"></i>
+              <div class="message-card-title">Selecione uma Matéria</div>
+            </div>
+            <div class="message-card-content">
+              <div class="quick-actions">
+        `;
+        
+        edital.disciplinas.forEach(disciplina => {
+          materiasHTML += `
+            <button class="action-btn info" onclick="chatBot.showEditalMateria('${disciplina.nome}')">
+              <i class="fas fa-book-open"></i> ${disciplina.nome}
+            </button>
+          `;
+        });
+        
+        materiasHTML += `
+              </div>
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(materiasHTML, true, 'materias-edital');
+      }
+      
+      showEditalMateria(materiaNome) {
+        const editalData = this.getEditalData();
+        if (!editalData) {
+          this.typeMessage("Não foi possível carregar os dados do edital.");
+          return;
+        }
+        
+        const { edital, progresso } = editalData;
+        const disciplina = edital.disciplinas.find(d => d.nome === materiaNome);
+        
+        if (!disciplina) {
+          this.typeMessage("Matéria não encontrada no edital.");
+          return;
+        }
+        
+        let totalTopicos = 0;
+        let topicosConcluidos = 0;
+        const topicosDetalhados = [];
+        
+        disciplina.topicos.forEach(topico => {
+          totalTopicos++;
+          const chaveTopico = `${disciplina.nome}-${topico}`;
+          const concluido = progresso[chaveTopico] || false;
+          
+          if (concluido) {
+            topicosConcluidos++;
+          }
+          
+          topicosDetalhados.push({ nome: topico, concluido: concluido });
+        });
+        
+        const porcentagem = totalTopicos > 0 ? Math.round((topicosConcluidos / totalTopicos) * 100) : 0;
+        
+        let materiaHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-book-open"></i>
+              <div class="message-card-title">${disciplina.nome}</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${porcentagem}%</div>
+                  <div class="message-stat-label">Concluído</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${topicosConcluidos}/${totalTopicos}</div>
+                  <div class="message-stat-label">Tópicos</div>
+                </div>
+              </div>
+              <div class="message-progress">
+                <div class="message-progress-bar">
+                  <div class="message-progress-fill" style="width: ${porcentagem}%"></div>
+                </div>
+                <div class="message-progress-text">
+                  <span>0%</span>
+                  <span>${porcentagem}%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+              <div class="message-section">
+                <div class="message-section-title">Tópicos</div>
+                <div class="message-list">
+        `;
+        
+        topicosDetalhados.forEach(topico => {
+          const statusIcon = topico.concluido ? 'check-circle' : 'circle';
+          const statusColor = topico.concluido ? 'success' : 'gray';
+          
+          materiaHTML += `
+            <div class="message-list-item">
+              <div class="message-list-icon" style="color: var(--${statusColor})">
+                <i class="fas fa-${statusIcon}"></i>
+              </div>
+              <div class="message-list-content">
+                <div class="message-list-title">${topico.nome}</div>
+                <div class="message-list-description">
+                  ${topico.concluido ? 'Concluído' : 'Pendente'}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        materiaHTML += `
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(materiaHTML, true, `edital-${materiaNome}`);
+      }
+      
+      showSimuladosMenu() {
+        const simuladosData = this.getSimuladosData();
+        if (!simuladosData || simuladosData.simulados.length === 0) {
+          this.typeMessage("Não encontrei dados de simulados. Verifique se você já realizou algum simulado no módulo correspondente.");
+          return;
+        }
+        
+        this.addBotMessage(`
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-chart-line"></i>
+              <div class="message-card-title">Análise de Simulados</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-text">
+                O que você gostaria de ver?
+              </div>
+              <div class="quick-actions" style="margin-top: 12px">
+                <button class="action-btn primary" onclick="chatBot.showUltimoSimuladoNota()">
+                  <i class="fas fa-star"></i> Nota do Último Simulado
+                </button>
+                <button class="action-btn secondary" onclick="chatBot.showUltimoSimuladoRelatorio()">
+                  <i class="fas fa-chart-bar"></i> Relatório Completo
+                </button>
+                <button class="action-btn info" onclick="chatBot.showUltimoSimuladoData()">
+                  <i class="fas fa-calendar"></i> Data do Último Simulado
+                </button>
+              </div>
+            </div>
+          </div>
+        `, true, 'simulados-menu');
+      }
+      
+      getSimuladosData() {
+        try {
+          const simulados = JSON.parse(localStorage.getItem('simulados')) || [];
+          const provas = JSON.parse(localStorage.getItem('provas')) || [];
+          const provaAtivaId = localStorage.getItem('provaAtivaId');
+          
+          if (simulados.length === 0) return null;
+          
+          simulados.sort((a, b) => new Date(b.date) - new Date(a.date));
+          
+          const ultimoSimulado = simulados[0];
+          const prova = provas.find(p => p.id === ultimoSimulado.idProva);
+          
+          return {
+            simulados: simulados,
+            ultimoSimulado: ultimoSimulado,
+            prova: prova,
+            provaAtivaId: provaAtivaId
+          };
+        } catch (error) {
+          console.error('Erro ao buscar dados de simulados:', error);
+          return null;
+        }
+      }
+      
+      showUltimoSimuladoNota() {
+        const simuladosData = this.getSimuladosData();
+        if (!simuladosData) {
+          this.typeMessage("Não foi possível carregar os dados dos simulados.");
+          return;
+        }
+        
+        const { ultimoSimulado, prova } = simuladosData;
+        const dataFormatada = new Date(ultimoSimulado.date).toLocaleDateString('pt-BR');
+        
+        const porcentagem = parseFloat(ultimoSimulado.totalPercentage);
+        let classificacao = '';
+        let corClassificacao = '';
+        
+        if (porcentagem >= 90) {
+          classificacao = 'EXCELENTE';
+          corClassificacao = 'success';
+        } else if (porcentagem >= 80) {
+          classificacao = 'ÓTIMO';
+          corClassificacao = 'primary';
+        } else if (porcentagem >= 66) {
+          classificacao = 'BOM';
+          corClassificacao = 'secondary';
+        } else if (porcentagem >= 51) {
+          classificacao = 'MÉDIO';
+          corClassificacao = 'warning';
+        } else if (porcentagem >= 31) {
+          classificacao = 'FRACO';
+          corClassificacao = 'warning';
+        } else {
+          classificacao = 'CRÍTICO';
+          corClassificacao = 'danger';
+        }
+        
+        const notaHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-star"></i>
+              <div class="message-card-title">Nota do Último Simulado</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${ultimoSimulado.totalScore}</div>
+                  <div class="message-stat-label">Pontuação</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${ultimoSimulado.totalPercentage}%</div>
+                  <div class="message-stat-label">Acertos</div>
+                </div>
+              </div>
+              <div class="message-alert message-alert-${corClassificacao}">
+                <i class="fas fa-${porcentagem >= 66 ? 'check' : 'exclamation'}-circle"></i>
+                <div><strong>Classificação: ${classificacao}</strong></div>
+              </div>
+              <div class="message-list">
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-calendar"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Data</div>
+                    <div class="message-list-description">${dataFormatada}</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-clock"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Tempo Total</div>
+                    <div class="message-list-description">${ultimoSimulado.totalTime} minutos</div>
+                  </div>
+                </div>
+                ${prova ? `
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-file-alt"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Prova</div>
+                    <div class="message-list-description">${prova.nomeConcurso} - ${prova.nomeBanca}</div>
+                  </div>
+                </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(notaHTML, true, 'ultimo-simulado-nota');
+      }
+      
+      showUltimoSimuladoRelatorio() {
+        const simuladosData = this.getSimuladosData();
+        if (!simuladosData) {
+          this.typeMessage("Não foi possível carregar os dados dos simulados.");
+          return;
+        }
+        
+        const { ultimoSimulado, prova } = simuladosData;
+        const dataFormatada = new Date(ultimoSimulado.date).toLocaleDateString('pt-BR');
+        
+        const disciplinas = [];
+        
+        if (prova && prova.disciplinas) {
+          Object.keys(prova.disciplinas).forEach(categoria => {
+            Object.keys(prova.disciplinas[categoria]).forEach(disciplina => {
+              if (ultimoSimulado.details[disciplina]) {
+                disciplinas.push({
+                  nome: disciplina,
+                  categoria: categoria,
+                  detalhes: ultimoSimulado.details[disciplina],
+                  tempo: ultimoSimulado.time[disciplina] || 0
+                });
+              }
+            });
+          });
+        } else {
+          Object.keys(ultimoSimulado.details).forEach(disciplina => {
+            disciplinas.push({
+              nome: disciplina,
+              categoria: 'GERAL',
+              detalhes: ultimoSimulado.details[disciplina],
+              tempo: ultimoSimulado.time[disciplina] || 0
+            });
+          });
+        }
+        
+        let relatorioHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-chart-bar"></i>
+              <div class="message-card-title">Relatório Completo - ${dataFormatada}</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-stats">
+                <div class="message-stat">
+                  <div class="message-stat-value">${ultimoSimulado.totalScore}</div>
+                  <div class="message-stat-label">Pontuação</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${ultimoSimulado.totalPercentage}%</div>
+                  <div class="message-stat-label">Acertos</div>
+                </div>
+                <div class="message-stat">
+                  <div class="message-stat-value">${ultimoSimulado.totalTime}</div>
+                  <div class="message-stat-label">Minutos</div>
+                </div>
+              </div>
+              <div class="message-section">
+                <div class="message-section-title">Desempenho por Disciplina</div>
+                <div class="message-list">
+        `;
+        
+        disciplinas.forEach(disciplina => {
+          const porcentagem = parseFloat(disciplina.detalhes.percentage);
+          let statusClass = '';
+          if (porcentagem >= 80) statusClass = 'success';
+          else if (porcentagem >= 60) statusClass = 'warning';
+          else statusClass = 'danger';
+          
+          relatorioHTML += `
+            <div class="message-list-item">
+              <div class="message-list-icon"><i class="fas fa-book"></i></div>
+              <div class="message-list-content">
+                <div class="message-list-title">${disciplina.nome}</div>
+                <div class="message-list-description">
+                  ${disciplina.detalhes.correct} acertos de ${disciplina.detalhes.correct + disciplina.detalhes.errors}
+                  <span class="message-badge message-badge-${statusClass}">${disciplina.detalhes.percentage}%</span>
+                </div>
+                <div class="message-list-description">
+                  Pontuação: ${disciplina.detalhes.score} • Tempo: ${disciplina.tempo} min
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        relatorioHTML += `
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(relatorioHTML, true, 'ultimo-simulado-relatorio');
+      }
+      
+      showUltimoSimuladoData() {
+        const simuladosData = this.getSimuladosData();
+        if (!simuladosData) {
+          this.typeMessage("Não foi possível carregar os dados dos simulados.");
+          return;
+        }
+        
+        const { ultimoSimulado, simulados } = simuladosData;
+        const dataFormatada = new Date(ultimoSimulado.date).toLocaleDateString('pt-BR');
+        
+        const hoje = new Date();
+        const dataSimulado = new Date(ultimoSimulado.date);
+        const diffTime = Math.abs(hoje - dataSimulado);
+        const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const dataHTML = `
+          <div class="message-card">
+            <div class="message-card-header">
+              <i class="fas fa-calendar"></i>
+              <div class="message-card-title">Data do Último Simulado</div>
+            </div>
+            <div class="message-card-content">
+              <div class="message-alert message-alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>Seu último simulado foi realizado há <strong>${diffDias} dia(s)</strong></div>
+              </div>
+              <div class="message-list">
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-calendar-day"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Data</div>
+                    <div class="message-list-description">${dataFormatada}</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-history"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Tempo Decorrido</div>
+                    <div class="message-list-description">${diffDias} dia(s)</div>
+                  </div>
+                </div>
+                <div class="message-list-item">
+                  <div class="message-list-icon"><i class="fas fa-chart-line"></i></div>
+                  <div class="message-list-content">
+                    <div class="message-list-title">Total de Simulados</div>
+                    <div class="message-list-description">${simulados.length} realizados</div>
+                  </div>
+                </div>
+              </div>
+              ${diffDias > 30 ? `
+              <div class="message-alert message-alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>Faz mais de 30 dias desde seu último simulado. Considere realizar um novo para avaliar seu progresso.</div>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        
+        this.addBotMessage(dataHTML, true, 'ultimo-simulado-data');
+      }
+      
+      checkAlerts() {
+        const alertas = [];
+        const hoje = new Date();
+        
+        const revisoesAtrasadas = this.calculateOverdueReviews();
+        if (revisoesAtrasadas > 0) {
+          alertas.push({
+            tipo: 'alert-danger',
+            icone: 'exclamation-triangle',
+            mensagem: `Você tem ${revisoesAtrasadas} revisões atrasadas!`
+          });
+        }
+        
+        const dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+        const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+        
+        const lastReviewDate = this.getModuleData('lastReviewDate');
+        const hojeStr = hoje.toISOString().split('T')[0];
+        
+        if (lastReviewDate !== hojeStr) {
+          this.setModuleData('dailyCompletedReviews', 0);
+          this.setModuleData('lastReviewDate', hojeStr);
+        } else if (dailyCompletedReviews < dailyReviewGoal / 2) {
+          alertas.push({
+            tipo: 'alert-warning',
+            icone: 'bullseye',
+            mensagem: `Você completou apenas ${dailyCompletedReviews} de ${dailyReviewGoal} revisões hoje.`
+          });
+        }
+        
+        const ultimoEstudo = localStorage.getItem('ultimoEstudo');
+        if (ultimoEstudo) {
+          const diasSemEstudo = Math.floor((hoje - new Date(ultimoEstudo)) / (1000 * 60 * 60 * 24));
+          if (diasSemEstudo >= 2) {
+            alertas.push({
+              tipo: 'alert-danger',
+              icone: 'calendar-times',
+              mensagem: `Você não estuda há ${diasSemEstudo} dias!`
+            });
+          }
+        }
+        
+        return alertas;
+      }
+    }
+    
+    let chatBot;
+    document.addEventListener('DOMContentLoaded', function() {
+      chatBot = new StudyFlowChatBot();
+    });
+  </script>
+</body>
+</html>
